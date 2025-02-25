@@ -7,11 +7,14 @@ class AppBg extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: const BoxDecoration(
-      gradient: LinearGradient(
-        colors: [Color(0xFF00E3FD), Color(0xFFC4F6FF)],
-        begin: Alignment.topCenter,
-        end: Alignment.bottomCenter,
-      ),
+        gradient: LinearGradient(
+          colors: [
+            Color.fromARGB(255, 0, 219, 243),
+            Color.fromARGB(255, 183, 244, 255)
+          ],
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+        ),
       ),
     );
   }

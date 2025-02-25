@@ -19,14 +19,16 @@ class WelcomeScreen extends StatelessWidget {
                 // Skip Button
                 Skip(),
                 SizedBox(height: 80),
+
                 // Heading
                 Text(
                   "Welcome to Vavuniya Ads",
                   style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900),
                 ),
+
                 // Body
                 WelcomeScreenFeature(),
-                GetStart()
+                GetStart(),
               ],
             ),
           )

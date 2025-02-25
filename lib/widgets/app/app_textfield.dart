@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:vavuniya_ads/widgets/app/app_color.dart';
 import 'package:vavuniya_ads/widgets/app/app_spacing.dart';
-import 'package:vavuniya_ads/widgets/app/app_typography.dart' show AppTypography;
+import 'package:vavuniya_ads/widgets/app/app_typography.dart'
+    show AppTypography;
 
 class AppTextField extends StatelessWidget {
   final String hintText;
