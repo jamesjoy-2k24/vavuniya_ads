@@ -63,20 +63,21 @@ class _MobileNumberFieldState extends State<MobileNumberField> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            widget.label,
-            style: AppTypography.body.copyWith(
-              fontWeight: FontWeight.bold,
-              color: AppColors.textPrimary,
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 10),
+            child: Text(
+              widget.label,
+              style: AppTypography.body.copyWith(
+                fontWeight: FontWeight.bold,
+                color: AppColors.textPrimary,
+              ),
             ),
           ),
           const SizedBox(height: AppSpacing.small),
           TextFormField(
             controller: widget.controller,
             keyboardType: TextInputType.number,
-            inputFormatters: [
-              FilteringTextInputFormatter.digitsOnly
-            ], // Only numbers allowed
+            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
             validator: widget.validator,
             style: AppTypography.body,
             decoration: InputDecoration(
