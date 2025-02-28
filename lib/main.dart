@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'config/app_theme.dart';
-import 'config/app_router.dart';
-import 'config/app_routes.dart';
+import 'package:get/get.dart';
+import 'package:vavuniya_ads/config/app_theme.dart';
+import 'package:vavuniya_ads/config/app_routes.dart';
+import 'package:vavuniya_ads/config/app_router.dart';
 
 void main() {
   runApp(const MyApp());
@@ -10,14 +11,16 @@ void main() {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  @override 
+  @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return GetMaterialApp(
       title: 'Vavuniya Ads',
       theme: AppTheme.lightTheme,
       initialRoute: AppRoutes.splash,
-      onGenerateRoute: AppRouter.generateRoute,
+      getPages: AppRouter.routes,
       debugShowCheckedModeBanner: false,
+      defaultTransition: Transition.fade,
+      unknownRoute: AppRouter.unknownRoute,
     );
   }
 }

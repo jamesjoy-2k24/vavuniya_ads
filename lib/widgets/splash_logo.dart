@@ -6,16 +6,26 @@ class LogoWithText extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
+      mainAxisSize: MainAxisSize.min,
       children: [
-        Image.asset("assets/images/logo.png"),
-        const Text(
+        Image.asset(
+          "assets/images/logo.png",
+        ),
+        SizedBox(height: 10),
+        Text(
           "POST - BUY - SELL",
-          style: TextStyle(
-            fontSize: 16,
-            color: Colors.black87,
-            fontWeight: FontWeight.bold,
-            letterSpacing: 1.2,
-          ),
+          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    fontSize: 16,
+                    color: Colors.black87,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 1.2,
+                  ) ??
+              TextStyle(
+                fontSize: 16,
+                color: Colors.black87,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 1.2,
+              ),
         ),
       ],
     );

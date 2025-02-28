@@ -6,11 +6,9 @@ class LoadingIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: CupertinoActivityIndicator(
-        radius: 18,
-        color: AppColors.dark,
-      ),
+    return CupertinoActivityIndicator(
+      radius: 18,
+      color: AppColors.dark,
     );
   }
 }

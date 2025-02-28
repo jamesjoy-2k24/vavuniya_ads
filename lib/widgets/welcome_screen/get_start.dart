@@ -3,25 +3,27 @@ import 'package:vavuniya_ads/widgets/app/app_button.dart';
 import 'package:vavuniya_ads/widgets/auth/already_account.dart';
 
 class GetStart extends StatelessWidget {
-  const GetStart({super.key});
+  final VoidCallback onGetStarted;
+  final VoidCallback onLogin;
+
+  const GetStart({
+    super.key,
+    required this.onGetStarted,
+    required this.onLogin,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        // Get Started Button
         AppButton(
           text: "Get Started",
-          onPressed: () {
-            Navigator.pushReplacementNamed(context, "/register");
-          },
+          onPressed: onGetStarted,
         ),
-
-        // Already have an account
         AlreadyAccount(
           message: "Already have an account?",
-          actionText: "login",
-          routeName: "/login",
+          actionText: "Login",
+          onTap: onLogin,
         ),
       ],
     );

@@ -11,6 +11,8 @@ class AppButton extends StatelessWidget {
   final double? width;
   final double? height;
   final VoidCallback onPressed;
+  final Widget? loadingWidget;
+  final bool fullWidth;
 
   const AppButton({
     super.key,
@@ -21,6 +23,8 @@ class AppButton extends StatelessWidget {
     this.textColor = Colors.white,
     this.width,
     this.height,
+    this.loadingWidget,
+    this.fullWidth = true, Padding? icon,
   });
 
   @override
@@ -28,7 +32,7 @@ class AppButton extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: SizedBox(
-        width: width ?? double.infinity,
+        width: fullWidth ? double.infinity : width,
         height: height ?? 50,
         child: ElevatedButton(
           style: ElevatedButton.styleFrom(
@@ -38,11 +42,13 @@ class AppButton extends StatelessWidget {
             ),
             padding: const EdgeInsets.symmetric(vertical: AppSpacing.small),
           ),
-          onPressed: isLoading ? null : onPressed,
+          onPressed: isLoading ? null : onPressed, // Disable when loading
           child: isLoading
-              ? LoadingIndicator()
-              : Text(text,
-                  style: AppTypography.button.copyWith(color: textColor)),
+              ? loadingWidget ?? const LoadingIndicator()
+              : Text(
+                  text,
+                  style: AppTypography.button.copyWith(color: textColor),
+                ),
         ),
       ),
     );

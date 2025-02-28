@@ -1,42 +1,39 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:vavuniya_ads/core/controllers/splash_controller.dart';
 import 'package:vavuniya_ads/widgets/app/app_bg.dart';
 import 'package:vavuniya_ads/widgets/splash_logo.dart';
 import 'package:vavuniya_ads/widgets/app/loading_indicator.dart';
-import 'package:vavuniya_ads/core/controllers/splash_controller.dart';
 
-class SplashScreen extends StatefulWidget {
+class SplashScreen extends StatelessWidget {
   const SplashScreen({super.key});
 
   @override
-  _SplashScreenState createState() => _SplashScreenState();
-}
-
-class _SplashScreenState extends State<SplashScreen> {
-  late SplashController _controller;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = SplashController(context);
-    _controller.startSplash();
-  }
-
-  @override
   Widget build(BuildContext context) {
+    // Initialize controller with GetX
+    final SplashController controller = Get.put(SplashController());
+
+    // Start splash logic
+    controller.startSplash();
+
     return Scaffold(
-      body: Stack(children: [
-        AppBg(),
-        SafeArea(
-            child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            LogoWithText(),
-            SizedBox(height: 30),
-            LoadingIndicator(),
-          ],
-        )),
-      ]),
+      body: Stack(
+        children: [
+          AppBg(),
+          SafeArea(
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  LogoWithText(),
+                  SizedBox(height: 30),
+                  LoadingIndicator(),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

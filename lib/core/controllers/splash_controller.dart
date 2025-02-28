@@ -1,22 +1,26 @@
 import 'dart:async';
-import 'package:flutter/material.dart';
-import 'package:vavuniya_ads/config/app_routes.dart';
+import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:vavuniya_ads/config/app_routes.dart';
 
-class SplashController {
-  final BuildContext context;
-
-  SplashController(this.context);
-
+class SplashController extends GetxController {
   void startSplash() {
     Timer(const Duration(seconds: 3), () async {
-      final prefs = await SharedPreferences.getInstance();
-      bool isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
+      try {
+        final prefs = await SharedPreferences.getInstance();
+        bool isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
+        bool isOnboardingComplete =
+            prefs.getBool('isOnboardingComplete') ?? false;
 
-      if (isLoggedIn) {
-        Navigator.pushReplacementNamed(context, AppRoutes.home);
-      } else {
-        Navigator.pushReplacementNamed(context, AppRoutes.welcome);
+        if (isLoggedIn) {
+          Get.offNamed(AppRoutes.home);
+        } else if (isOnboardingComplete) {
+          Get.offNamed(AppRoutes.register);
+        } else {
+          Get.offNamed(AppRoutes.welcome);
+        }
+      } catch (e) {
+        Get.offNamed(AppRoutes.welcome);
       }
     });
   }

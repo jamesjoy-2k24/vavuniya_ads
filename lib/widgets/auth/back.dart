@@ -10,7 +10,7 @@ class Back extends StatelessWidget {
       alignment: Alignment.topLeft,
       child: TextButton(
         onPressed: () {
-          Navigator.of(context).pop();
+          Navigator.pop(context);
         },
         child: Row(
           mainAxisSize: MainAxisSize.min,

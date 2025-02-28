@@ -11,6 +11,4 @@ class AppColors {
   static const Color dark = Color(0xFF212121);
   static const Color lightGrey = Color(0xFFF5F5F5);
   static const Color error = Color(0xFFE57373);
-
-  static var divider;
 }

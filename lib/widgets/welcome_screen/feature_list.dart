@@ -34,15 +34,16 @@ class WelcomeScreenFeature extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title,
-                    style:
-                        TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                Text(
+                  title,
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                ),
                 SizedBox(height: 5),
                 Text(description,
                     style: TextStyle(fontSize: 14, color: Colors.grey[700])),
               ],
             ),
-          )
+          ),
         ],
       ),
     );
