@@ -23,7 +23,7 @@ class AppRouter {
       },
     ),
     GetPage(name: AppRoutes.registerFinal, page: () => const RegisterFinal()),
-    GetPage(name: AppRoutes.login, page: () => LoginScreen()),
+    GetPage(name: AppRoutes.login, page: () => const LoginScreen()),
     GetPage(name: AppRoutes.home, page: () => HomeScreen()),
   ];
 

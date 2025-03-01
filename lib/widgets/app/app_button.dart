@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:vavuniya_ads/widgets/app/app_spacing.dart';
 import 'package:vavuniya_ads/widgets/app/app_typography.dart';
-import 'package:vavuniya_ads/widgets/app/loading_indicator.dart';
 
 class AppButton extends StatelessWidget {
   final String text;
@@ -24,7 +23,8 @@ class AppButton extends StatelessWidget {
     this.width,
     this.height,
     this.loadingWidget,
-    this.fullWidth = true, Padding? icon,
+    this.fullWidth = true,
+    Padding? icon,
   });
 
   @override
@@ -44,7 +44,10 @@ class AppButton extends StatelessWidget {
           ),
           onPressed: isLoading ? null : onPressed, // Disable when loading
           child: isLoading
-              ? loadingWidget ?? const LoadingIndicator()
+              ? loadingWidget ??
+                  const CircularProgressIndicator(  
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                  )
               : Text(
                   text,
                   style: AppTypography.button.copyWith(color: textColor),

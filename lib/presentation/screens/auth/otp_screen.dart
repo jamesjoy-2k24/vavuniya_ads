@@ -1,10 +1,10 @@
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:vavuniya_ads/core/controllers/auth/otp_verification_controller.dart';
+import 'package:flutter/material.dart';
 import 'package:vavuniya_ads/widgets/app/app_bg.dart';
-import 'package:vavuniya_ads/widgets/app/app_button.dart';
 import 'package:vavuniya_ads/widgets/app/app_color.dart';
+import 'package:vavuniya_ads/widgets/app/app_button.dart';
 import 'package:vavuniya_ads/widgets/auth/otp_input.dart';
+import 'package:vavuniya_ads/core/controllers/auth/otp_verification_controller.dart';
 
 class OtpScreen extends StatelessWidget {
   final String phoneNumber;

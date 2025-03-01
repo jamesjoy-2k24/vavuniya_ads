@@ -6,13 +6,14 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 import 'package:vavuniya_ads/core/controllers/auth/register_controller.dart';
+import 'package:vavuniya_ads/widgets/pop_up.dart';
 
 class OTPVerificationController extends GetxController {
   final TextEditingController otpController = TextEditingController();
   final RxBool isButtonDisabled = true.obs;
   final RxBool canResend = false.obs;
   final RxInt timerCount = 30.obs;
-  final RxBool isLoading = false.obs; // Added for button loading
+  final RxBool isLoading = false.obs;
   late String phoneNumber;
 
   static const String baseUrl = 'http://localhost/vavuniya_ads';
@@ -47,12 +48,14 @@ class OTPVerificationController extends GetxController {
   Future<void> verifyOTP(String otp) async {
     if (otp.length != 6) {
       Get.snackbar("Error", "Please enter a 6-digit OTP",
-          snackPosition: SnackPosition.TOP);
+          snackPosition: SnackPosition.TOP,
+          backgroundColor: Colors.red,
+          colorText: Colors.white);
       return;
     }
 
     isButtonDisabled.value = true;
-    isLoading.value = true; // Show loading
+    isLoading.value = true;
 
     try {
       final response = await http.post(
@@ -63,26 +66,28 @@ class OTPVerificationController extends GetxController {
 
       final data = jsonDecode(response.body);
       if (response.statusCode == 200) {
-        Get.dialog(
-          AlertDialog(
-            title: const Text("Success"),
-            content: const Text("OTP Verified Successfully!"),
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          ),
-          barrierDismissible: false,
+        showCustomDialogPopup(
+          title: "Success",
+          content: "OTP verification successful",
+          icon: Icons.check_circle,
+          buttonText: "Continue",
+          onPressed: () => Get.back(),
         );
+
         await Future.delayed(const Duration(seconds: 2));
         Get.back();
-        Get.offNamed("/register-final"); // Redirect to RegisterFinal
+        // Pass phoneNumber to RegisterFinal
+        Get.offNamed("/register-final", arguments: {"phone": phoneNumber});
       } else {
         throw data['error'] ?? 'Unknown error';
       }
     } catch (e) {
       Get.snackbar("Error", "Verification failed: $e",
-          snackPosition: SnackPosition.TOP);
+          snackPosition: SnackPosition.TOP,
+          backgroundColor: Colors.red,
+          colorText: Colors.white);
     } finally {
-      isLoading.value = false; // Hide loading
+      isLoading.value = false;
       isButtonDisabled.value = false;
     }
   }

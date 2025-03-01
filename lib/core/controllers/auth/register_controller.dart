@@ -9,8 +9,7 @@ class RegisterController extends GetxController {
   final RxString phoneNumber = "".obs;
   final RxString errorMessage = "".obs;
 
-  static const String baseUrl =
-      'http://localhost/vavuniya_ads';
+  static const String baseUrl = 'http://localhost/vavuniya_ads';
 
   @override
   void onInit() {
@@ -56,7 +55,9 @@ class RegisterController extends GetxController {
     if (phoneNumberValue.length != 12) {
       errorMessage.value = "Please enter a valid 9-digit phone number";
       Get.snackbar("Error", "Invalid phone number",
-          snackPosition: SnackPosition.TOP);
+          snackPosition: SnackPosition.TOP,
+          backgroundColor: Colors.redAccent,
+          colorText: Colors.white);
       return;
     }
 
@@ -64,6 +65,29 @@ class RegisterController extends GetxController {
     errorMessage.value = "";
 
     try {
+      // Check if user exists
+      final userExists = await http.post(
+        Uri.parse('$baseUrl/api/auth/user_exists'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'phone': phoneNumberValue}),
+      );
+
+      final userExistsData = jsonDecode(userExists.body);
+      if (userExists.statusCode != 200) {
+        throw userExistsData['error'] ?? 'Failed to check user existence';
+      }
+      if (userExistsData['exists'] == true) {
+        Get.snackbar(
+          "Error",
+          "This phone number is already registered",
+          snackPosition: SnackPosition.TOP,
+          backgroundColor: Colors.redAccent,
+          colorText: Colors.white,
+        );
+        return;
+      }
+
+      // Send OTP
       final response = await http.post(
         Uri.parse('$baseUrl/api/auth/send_otp'),
         headers: {'Content-Type': 'application/json'},
@@ -72,16 +96,26 @@ class RegisterController extends GetxController {
 
       final data = jsonDecode(response.body);
       if (response.statusCode == 200 && data['otp'] != null) {
-        Get.snackbar("OTP", "Your OTP is: ${data['otp']}",
-            snackPosition: SnackPosition.TOP);
+        Get.snackbar(
+          "OTP",
+          "Your OTP is: ${data['otp']}",
+          snackPosition: SnackPosition.TOP,
+          backgroundColor: Colors.green,
+          colorText: Colors.white,
+        );
         Get.toNamed("/otp", arguments: {"phone": phoneNumberValue});
       } else {
         throw data['error'] ?? 'Unknown error';
       }
     } catch (e) {
-      errorMessage.value = "Failed to get OTP: $e";
-      Get.snackbar("Error", "Something went wrong: $e",
-          snackPosition: SnackPosition.TOP);
+      errorMessage.value = "Failed to process OTP: $e";
+      Get.snackbar(
+        "Error",
+        "Something went wrong: $e",
+        snackPosition: SnackPosition.TOP,
+        backgroundColor: Colors.redAccent,
+        colorText: Colors.white,
+      );
     } finally {
       isLoading.value = false;
     }
