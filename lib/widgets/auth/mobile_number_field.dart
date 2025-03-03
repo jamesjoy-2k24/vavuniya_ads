@@ -7,6 +7,7 @@ class MobileNumberField extends StatelessWidget {
   final TextEditingController controller;
   final String label;
   final String hintText;
+  final Color fillColor;
   final String? Function(String?)? validator;
 
   const MobileNumberField({
@@ -15,6 +16,7 @@ class MobileNumberField extends StatelessWidget {
     required this.label,
     required this.controller,
     required this.hintText,
+    required this.fillColor,
   });
 
   @override
@@ -45,8 +47,8 @@ class MobileNumberField extends StatelessWidget {
               contentPadding: const EdgeInsets.symmetric(horizontal: 20),
               hintText: hintText,
               hintStyle: AppTypography.body.copyWith(color: AppColors.grey),
+              fillColor: fillColor,
               filled: true,
-              fillColor: AppColors.lightGrey,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
                 borderSide: BorderSide.none,

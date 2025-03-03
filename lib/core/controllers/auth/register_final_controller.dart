@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
+import 'package:vavuniya_ads/config/app_routes.dart';
 import 'dart:convert';
 
 import 'package:vavuniya_ads/widgets/pop_up.dart';
@@ -106,11 +107,11 @@ class RegisterFinalController extends GetxController {
             iconColor: Colors.green,
             onPressed: () {
               Get.back();
-              Get.offAllNamed("/home");
+              Get.offAllNamed(AppRoutes.home);
             });
         await Future.delayed(const Duration(seconds: 2));
         Get.back();
-        Get.offAllNamed("/home");
+        Get.offAllNamed(AppRoutes.home);
       } else {
         throw data['error'] ?? 'Unknown error';
       }
@@ -125,7 +126,7 @@ class RegisterFinalController extends GetxController {
   }
 
   @override
-   void onClose() {
+  void onClose() {
     nameController.dispose();
     passwordController.dispose();
     confirmPasswordController.dispose();

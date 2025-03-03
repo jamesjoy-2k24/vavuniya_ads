@@ -19,9 +19,6 @@ class RegisterScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bool showBackButton =
-        ModalRoute.of(context)?.settings.arguments as bool? ?? false;
-
     return Scaffold(
       body: Stack(
         children: [
@@ -33,7 +30,7 @@ class RegisterScreen extends StatelessWidget {
                 children: [
                   Column(
                     children: [
-                      if (showBackButton) Back(),
+                      Back(),
                       SizedBox(height: 50),
                       Text(
                         "Your Mobile Number",
@@ -56,6 +53,7 @@ class RegisterScreen extends StatelessWidget {
                           hintText: "Enter your mobile number",
                           controller: controller.phoneController,
                           validator: controller.validatePhoneNumber,
+                          fillColor: Colors.white,
                         ),
                         Obx(() {
                           final error = controller.errorMessage.value;
