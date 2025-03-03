@@ -58,6 +58,13 @@ class LoginScreen extends StatelessWidget {
                             controller: controller.phoneController,
                             keyboardType: TextInputType.number,
                             icon: Icons.phone_android_outlined,
+                            onChanged: (value) {
+                              // Handle change
+                            },
+                            suffixIcon: IconButton(
+                              icon: Icon(Icons.check),
+                              onPressed: () {},
+                            ),
                           ),
                           Obx(
                             () => controller.errorMessage.isNotEmpty &&
@@ -75,8 +82,6 @@ class LoginScreen extends StatelessWidget {
                                   )
                                 : const SizedBox.shrink(),
                           ),
-
-                          // Password Field
                           AppTextField(
                             label: "Password",
                             hintText: "Enter your password",
@@ -85,6 +90,15 @@ class LoginScreen extends StatelessWidget {
                             obscureText: true,
                             validator: controller.validatePassword,
                             icon: Icons.lock_outline,
+                            onChanged: (value) {
+                              // Handle change
+                            },
+                            suffixIcon: IconButton(
+                              icon: Icon(Icons.visibility_off),
+                              onPressed: () {
+                                // Handle visibility toggle
+                              },
+                            ),
                           ),
                           Obx(
                             () => controller.passwordError.isNotEmpty

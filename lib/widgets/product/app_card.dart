@@ -1,4 +1,4 @@
-// widgets/app/ad_card.dart
+// ignore_for_file: non_constant_identifier_names
 import 'package:flutter/material.dart';
 import 'package:vavuniya_ads/widgets/app/app_color.dart';
 import 'package:vavuniya_ads/widgets/app/app_typography.dart';
@@ -6,7 +6,7 @@ import 'package:vavuniya_ads/widgets/app/app_typography.dart';
 class AdCard extends StatelessWidget {
   final String title;
   final double price;
-  final String condition;
+  final String item_condition;
   final String? imageUrl;
   final String? location;
   final VoidCallback onTap;
@@ -15,7 +15,7 @@ class AdCard extends StatelessWidget {
     super.key,
     required this.title,
     required this.price,
-    required this.condition,
+    required this.item_condition,
     this.imageUrl,
     this.location,
     required this.onTap,
@@ -32,21 +32,20 @@ class AdCard extends StatelessWidget {
           padding: const EdgeInsets.all(8.0),
           child: Row(
             children: [
-              // Image (or placeholder)
               ClipRRect(
                 borderRadius: BorderRadius.circular(8),
-                child: imageUrl != null
-                    ? Image.network(imageUrl!,
-                        width: 80, height: 80, fit: BoxFit.cover)
-                    : Container(
+                child: imageUrl != null && imageUrl!.isNotEmpty
+                    ? Image.network(
+                        imageUrl!,
                         width: 80,
                         height: 80,
-                        color: Colors.grey[300],
-                        child: const Icon(Icons.image, color: Colors.grey),
-                      ),
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) =>
+                            _imagePlaceholder(),
+                      )
+                    : _imagePlaceholder(),
               ),
               const SizedBox(width: 10),
-              // Details
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -60,13 +59,13 @@ class AdCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      "LKR $price",
+                      "LKR ${price.toStringAsFixed(2)}",
                       style:
                           AppTypography.caption.copyWith(color: AppColors.dark),
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      "$condition${location != null ? ' • $location' : ''}",
+                      "$item_condition${location != null ? ' • $location' : ''}",
                       style: AppTypography.caption
                           .copyWith(color: Colors.grey[700]),
                     ),
@@ -77,6 +76,15 @@ class AdCard extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _imagePlaceholder() {
+    return Container(
+      width: 80,
+      height: 80,
+      color: Colors.grey[300],
+      child: const Icon(Icons.image, color: Colors.grey),
     );
   }
 }

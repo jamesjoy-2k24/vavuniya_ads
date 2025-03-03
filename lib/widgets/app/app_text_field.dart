@@ -25,7 +25,7 @@ class AppTextField extends StatefulWidget {
     this.fillColor,
     this.borderColor,
     this.borderRadius = 12.0,
-    this.icon, required TextInputType keyboardType,
+    this.icon, required TextInputType keyboardType, required void Function(dynamic value) onChanged, required IconButton suffixIcon,
   });
 
   @override

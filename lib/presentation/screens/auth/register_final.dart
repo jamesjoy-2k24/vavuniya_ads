@@ -52,7 +52,13 @@ class RegisterFinal extends StatelessWidget {
                           controller: controller.nameController,
                           keyboardType: TextInputType.numberWithOptions(),
                           validator: controller.validateName,
-                          icon: Icons.person_outline,
+                          onChanged: (value) {
+                            // Handle change
+                          },
+                          suffixIcon: IconButton(
+                            icon: Icon(Icons.person_outline),
+                            onPressed: () {},
+                          ),
                         ),
                         Obx(
                           () => controller.nameError.isNotEmpty
@@ -80,7 +86,11 @@ class RegisterFinal extends StatelessWidget {
                           keyboardType: TextInputType.visiblePassword,
                           obscureText: true,
                           validator: controller.validatePassword,
-                          icon: Icons.lock_outline,
+                          onChanged: (value) {},
+                          suffixIcon: IconButton(
+                            icon: Icon(Icons.lock_outline),
+                            onPressed: () {},
+                          ),
                         ),
                         Obx(
                           () => controller.passwordError.isNotEmpty
@@ -107,7 +117,13 @@ class RegisterFinal extends StatelessWidget {
                           controller: controller.confirmPasswordController,
                           obscureText: true,
                           validator: controller.validateConfirmPassword,
-                          icon: Icons.lock_outline,
+                          onChanged: (value) {
+                            // Handle change
+                          },
+                          suffixIcon: IconButton(
+                            icon: Icon(Icons.lock_outline),
+                            onPressed: () {},
+                          ),
                           keyboardType: TextInputType.visiblePassword,
                         ),
                         Obx(
