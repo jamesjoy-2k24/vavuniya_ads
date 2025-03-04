@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:vavuniya_ads/config/app_routes.dart';
+import 'package:vavuniya_ads/presentation/screens/category_screen.dart';
 import 'package:vavuniya_ads/presentation/screens/home_screen.dart';
 import 'package:vavuniya_ads/presentation/screens/splash_screen.dart';
 import 'package:vavuniya_ads/presentation/screens/welcome_screen.dart';
@@ -25,6 +26,7 @@ class AppRouter {
     GetPage(name: AppRoutes.registerFinal, page: () => const RegisterFinal()),
     GetPage(name: AppRoutes.login, page: () => const LoginScreen()),
     GetPage(name: AppRoutes.home, page: () => HomeScreen()),
+    GetPage(name: AppRoutes.categories, page: () => const CategoriesPage()),
   ];
 
   static GetPage unknownRoute = GetPage(

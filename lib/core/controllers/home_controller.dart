@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
@@ -7,13 +9,12 @@ import 'package:vavuniya_ads/config/app_routes.dart';
 
 class HomeController extends GetxController {
   final RxList<Map<String, dynamic>> ads = <Map<String, dynamic>>[].obs;
-  final RxList<Map<String, dynamic>> favoriteAds =
-      <Map<String, dynamic>>[].obs; // New
+  final RxList<Map<String, dynamic>> favoriteAds = <Map<String, dynamic>>[].obs;
   final RxList<String> categories = <String>[].obs;
-  final RxString selectedCategory = ''.obs;
   final RxBool isLoading = true.obs;
+  final RxBool isFirstVisit = true.obs;
   final RxString searchQuery = ''.obs;
-  final RxBool isFirstVisit = true.obs; // New
+  final RxString selectedCategory = ''.obs;
 
   static const String baseUrl = 'http://localhost/vavuniya_ads';
 
@@ -24,14 +25,20 @@ class HomeController extends GetxController {
     fetchAds();
   }
 
+// First Visit
   Future<void> _checkFirstVisit() async {
     final prefs = await SharedPreferences.getInstance();
-    isFirstVisit.value = prefs.getBool('isFirstVisit') ?? true;
-    if (isFirstVisit.value) {
-      await prefs.setBool('isFirstVisit', false);
-    }
+    isFirstVisit.value = prefs.getBool('isFirstVisitHome') ?? true;
   }
 
+// Dismiss First Visit
+  Future<void> dismissFirstVisit() async {
+    isFirstVisit.value = false;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('isFirstVisitHome', false);
+  }
+
+// Fetch Ads
   Future<void> fetchAds({String? categoryId, String? search}) async {
     isLoading.value = true;
     try {
@@ -68,6 +75,7 @@ class HomeController extends GetxController {
     }
   }
 
+// Filter Category
   void filterByCategory(String? category) {
     selectedCategory.value = category ?? '';
     fetchAds(
@@ -75,6 +83,7 @@ class HomeController extends GetxController {
         search: searchQuery.value.isEmpty ? null : searchQuery.value);
   }
 
+// Search Ads
   void searchAds(String query) {
     searchQuery.value = query;
     fetchAds(
@@ -82,6 +91,7 @@ class HomeController extends GetxController {
         search: query.isEmpty ? null : query);
   }
 
+// Logout
   Future<void> logout() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('isLoggedIn', false);
