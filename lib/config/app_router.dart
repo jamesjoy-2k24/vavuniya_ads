@@ -26,7 +26,7 @@ class AppRouter {
     GetPage(name: AppRoutes.registerFinal, page: () => const RegisterFinal()),
     GetPage(name: AppRoutes.login, page: () => const LoginScreen()),
     GetPage(name: AppRoutes.home, page: () => HomeScreen()),
-    GetPage(name: AppRoutes.categories, page: () => const CategoriesPage()),
+    GetPage(name: AppRoutes.categories, page: () => const CategoryScreen()),
   ];
 
   static GetPage unknownRoute = GetPage(

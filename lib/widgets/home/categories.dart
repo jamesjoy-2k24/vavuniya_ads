@@ -5,11 +5,12 @@ import 'package:vavuniya_ads/widgets/app/app_color.dart';
 import 'package:vavuniya_ads/widgets/app/app_typography.dart';
 
 class Categories extends StatelessWidget {
-  Categories({super.key});
-  final HomeController controller = Get.find<HomeController>();
+  const Categories({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final HomeController controller = Get.find<HomeController>();
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -17,93 +18,114 @@ class Categories extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
           child: Text(
             "Categories",
-            style: AppTypography.subheading,
+            style: AppTypography.subheading.copyWith(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ),
-        _buildCategories(context, controller),
+        Obx(() {
+          if (controller.isLoading.value) {
+            return const Padding(
+              padding: EdgeInsets.all(16.0),
+              child: Center(child: CircularProgressIndicator()),
+            );
+          }
+          if (controller.categories.isEmpty && !controller.isLoading.value) {
+            return const Padding(
+              padding: EdgeInsets.all(16.0),
+              child: Center(child: Text("No categories available")),
+            );
+          }
+          return _buildCategories(context, controller);
+        }),
       ],
     );
   }
 }
 
 Widget _buildCategories(BuildContext context, HomeController controller) {
-  final List<Map<String, dynamic>> allCategories = [
-    {
-      "name": "Vehicles",
+  const categoryStyles = {
+    "Vehicles": {
       "icon": Icons.directions_car,
-      "bgColor": const Color(0xFFDAFAF8),
-      "iconColor": const Color(0xFF00C7BE),
+      "bgColor": Color(0xFFDAFAF8),
+      "iconColor": Color(0xFF00C7BE),
     },
-    {
-      "name": "Jobs",
+    "Jobs": {
       "icon": Icons.work,
-      "bgColor": const Color(0xFFFFEBEE),
-      "iconColor": const Color(0xFFB71C1C),
+      "bgColor": Color(0xFFFFEBEE),
+      "iconColor": Color(0xFFB71C1C),
     },
-    {
-      "name": "Services",
+    "Services": {
       "icon": Icons.build,
-      "bgColor": const Color(0xFFE3F2FD),
-      "iconColor": const Color(0xFF0D47A1),
+      "bgColor": Color(0xFFE3F2FD),
+      "iconColor": Color(0xFF0D47A1),
     },
-    {
-      "name": "Property",
+    "Property": {
       "icon": Icons.home,
-      "bgColor": const Color(0xFFFFEFD6),
-      "iconColor": const Color(0xFFE65100),
+      "bgColor": Color(0xFFFFEFD6),
+      "iconColor": Color(0xFFE65100),
     },
-    {
-      "name": "Agriculture",
+    "Agriculture": {
       "icon": Icons.local_florist,
-      "bgColor": const Color(0xFFE1FFE4),
-      "iconColor": const Color(0xFF1B5E20),
+      "bgColor": Color(0xFFE1FFE4),
+      "iconColor": Color(0xFF1B5E20),
     },
-    {
-      "name": "Education",
+    "Education": {
       "icon": Icons.school,
-      "bgColor": const Color(0xFFF2DFF4),
-      "iconColor": const Color(0xFF4A148C),
+      "bgColor": Color(0xFFF2DFF4),
+      "iconColor": Color(0xFF4A148C),
     },
-    {
-      "name": "Electronics",
+    "Electronics": {
       "icon": Icons.devices,
-      "bgColor": const Color(0xFFDEDCFF),
-      "iconColor": const Color(0xFF00188D),
+      "bgColor": Color(0xFFDEDCFF),
+      "iconColor": Color(0xFF00188D),
     },
-    {
-      "name": "Health",
+    "Health": {
       "icon": Icons.local_hospital,
-      "bgColor": const Color(0xFFF8E1E1),
-      "iconColor": const Color(0xFFD81B60),
+      "bgColor": Color(0xFFF8E1E1),
+      "iconColor": Color(0xFFD81B60),
     },
-    {
-      "name": "Fashion",
+    "Fashion": {
       "icon": Icons.checkroom,
-      "bgColor": const Color(0xFFFFF0E1),
-      "iconColor": const Color(0xFFF06292),
+      "bgColor": Color(0xFFFFF0E1),
+      "iconColor": Color(0xFFF06292),
     },
-    {
-      "name": "Food",
+    "Food": {
       "icon": Icons.fastfood,
-      "bgColor": const Color(0xFFFFF9E1),
-      "iconColor": const Color(0xFF795548),
+      "bgColor": Color(0xFFFFF9E1),
+      "iconColor": Color(0xFF795548),
     },
-    {
-      "name": "Travel",
+    "Travel": {
       "icon": Icons.flight,
-      "bgColor": const Color(0xFFE1F5FF),
-      "iconColor": const Color(0xFF0277BD),
+      "bgColor": Color(0xFFE1F5FF),
+      "iconColor": Color(0xFF0277BD),
     },
-    {
-      "name": "Sports",
+    "Sports": {
       "icon": Icons.sports_soccer,
-      "bgColor": const Color(0xFFE8F5E9),
-      "iconColor": const Color(0xFF2E7D32),
+      "bgColor": Color(0xFFE8F5E9),
+      "iconColor": Color(0xFF2E7D32),
     },
-  ];
+  };
 
-  // Show only 7 + "More"
-  final displayedCategories = allCategories.take(7).toList();
+  final availableCategories = controller.categories.isNotEmpty
+      ? controller.categories
+      : categoryStyles.keys.toList();
+  final displayedCategories = availableCategories.take(7).map((cat) {
+    final style = categoryStyles[cat] ??
+        {
+          "icon": Icons.category,
+          "bgColor": AppColors.lightGrey,
+          "iconColor": AppColors.dark,
+        };
+    return {
+      "name": cat,
+      "icon": style["icon"] as IconData,
+      "bgColor": style["bgColor"] as Color,
+      "iconColor": style["iconColor"] as Color,
+    };
+  }).toList();
+
   const moreItem = {
     "name": "More",
     "icon": Icons.more_horiz,
@@ -117,35 +139,27 @@ Widget _buildCategories(BuildContext context, HomeController controller) {
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       crossAxisCount: 4,
-      childAspectRatio: 0.85, // Slightly adjusted for better spacing
-      mainAxisSpacing: 8.0,
-      crossAxisSpacing: 8.0,
-      children: List.generate(
-        8, // 7 categories + "More"
-        (index) => index < 7
-            ? _buildCategoryItem(
-                context,
-                displayedCategories[index]["name"],
-                displayedCategories[index]["icon"],
-                displayedCategories[index]["bgColor"],
-                displayedCategories[index]["iconColor"],
-                () {
-                  controller
-                      .filterByCategory(displayedCategories[index]["name"]);
-                },
-              )
-            : _buildCategoryItem(
-                context,
-                moreItem["name"] as String,
-                moreItem["icon"] as IconData,
-                moreItem["bgColor"] as Color,
-                moreItem["iconColor"] as Color,
-                () {
-                  Get.toNamed("/categories",
-                      arguments: allCategories); // Pass all categories
-                },
-              ),
-      ),
+      childAspectRatio: 0.8,
+      mainAxisSpacing: 12.0,
+      crossAxisSpacing: 12.0,
+      children: [
+        ...displayedCategories.map((category) => _buildCategoryItem(
+              context,
+              category["name"] as String,
+              category["icon"] as IconData,
+              category["bgColor"] as Color,
+              category["iconColor"] as Color,
+              () => controller.filterByCategory(category["name"] as String),
+            )),
+        _buildCategoryItem(
+          context,
+          moreItem["name"] as String,
+          moreItem["icon"] as IconData,
+          moreItem["bgColor"] as Color,
+          moreItem["iconColor"] as Color,
+          () => Get.toNamed("/categories", arguments: categoryStyles),
+        ),
+      ],
     ),
   );
 }
@@ -160,30 +174,44 @@ Widget _buildCategoryItem(
 ) {
   return GestureDetector(
     onTap: onTap,
-    child: Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        CircleAvatar(
-          radius: 30,
-          backgroundColor: bgColor,
-          child: Icon(
-            icon,
-            color: iconColor,
-            size: 28, // Slightly larger for better visibility
+    child: AnimatedContainer(
+      duration: const Duration(milliseconds: 200),
+      curve: Curves.easeInOut,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: bgColor,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 6,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: CircleAvatar(
+              radius: 28,
+              backgroundColor: Colors.transparent,
+              child: Icon(icon, color: iconColor, size: 30),
+            ),
           ),
-        ),
-        const SizedBox(height: 6),
-        Text(
-          name,
-          style: AppTypography.caption.copyWith(
-            fontSize: 12,
-            color: AppColors.textPrimary,
+          const SizedBox(height: 8),
+          Text(
+            name,
+            style: AppTypography.caption.copyWith(
+              fontSize: 12,
+              color: AppColors.textPrimary,
+              fontWeight: FontWeight.w500,
+            ),
+            textAlign: TextAlign.center,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
-          textAlign: TextAlign.center,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
-      ],
+        ],
+      ),
     ),
   );
 }
