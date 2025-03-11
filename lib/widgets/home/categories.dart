@@ -108,18 +108,21 @@ Widget _buildCategories(BuildContext context, HomeController controller) {
     },
   };
 
+  // Assuming this is in a widget's build method or a computed property
   final availableCategories = controller.categories.isNotEmpty
-      ? controller.categories
+      ? controller.categories.map((cat) => cat['name'] as String).toList()
       : categoryStyles.keys.toList();
-  final displayedCategories = availableCategories.take(7).map((cat) {
-    final style = categoryStyles[cat] ??
+
+// Take the first 7 categories and map them to styled objects
+  final displayedCategories = availableCategories.take(7).map((catName) {
+    final style = categoryStyles[catName] ??
         {
           "icon": Icons.category,
           "bgColor": AppColors.lightGrey,
           "iconColor": AppColors.dark,
         };
     return {
-      "name": cat,
+      "name": catName,
       "icon": style["icon"] as IconData,
       "bgColor": style["bgColor"] as Color,
       "iconColor": style["iconColor"] as Color,
@@ -149,7 +152,7 @@ Widget _buildCategories(BuildContext context, HomeController controller) {
               category["icon"] as IconData,
               category["bgColor"] as Color,
               category["iconColor"] as Color,
-              () => controller.filterByCategory(category["name"] as String),
+              () => controller.filterByCategory(category["id"] as String?),
             )),
         _buildCategoryItem(
           context,

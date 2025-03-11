@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:vavuniya_ads/config/app_routes.dart';
+import 'package:vavuniya_ads/presentation/screens/ad_detail_screen.dart';
 import 'package:vavuniya_ads/presentation/screens/category_screen.dart';
 import 'package:vavuniya_ads/presentation/screens/home_screen.dart';
 import 'package:vavuniya_ads/presentation/screens/splash_screen.dart';
@@ -23,10 +24,11 @@ class AppRouter {
         return OtpScreen(phoneNumber: phoneNumber);
       },
     ),
-    GetPage(name: AppRoutes.registerFinal, page: () => const RegisterFinal()),
-    GetPage(name: AppRoutes.login, page: () => const LoginScreen()),
     GetPage(name: AppRoutes.home, page: () => HomeScreen()),
+    GetPage(name: AppRoutes.login, page: () => const LoginScreen()),
     GetPage(name: AppRoutes.categories, page: () => const CategoryScreen()),
+    GetPage(name: AppRoutes.registerFinal, page: () => const RegisterFinal()),
+    GetPage(name: AppRoutes.adDetail, page: () => const AdDetailScreen()),
   ];
 
   static GetPage unknownRoute = GetPage(

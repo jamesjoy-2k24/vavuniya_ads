@@ -8,4 +8,5 @@ class AppRoutes {
   static const String register = "/register";
   static const String categories = "/categories";
   static const String registerFinal = '/register-final';
+  static const String adDetail = '/ad-detail';
 }

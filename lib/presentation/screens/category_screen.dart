@@ -10,64 +10,73 @@ class CategoryScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final HomeController controller = Get.find<HomeController>();
+    final HomeController controller = Get.put(HomeController());
     final Map<String, Map<String, dynamic>> categoryStyles =
         Get.arguments as Map<String, Map<String, dynamic>>? ?? {};
 
-    final availableCategories = controller.categories.isNotEmpty
-        ? controller.categories
-        : categoryStyles.keys.toList();
-
     return Scaffold(
-        appBar: AppBar(
-          title: Text(
-            "All Categories",
-            style: AppTypography.heading.copyWith(fontSize: 20),
-          ),
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back),
-            onPressed: () => Get.back(),
-          ),
+      appBar: AppBar(
+        title: Text(
+          "All Categories",
+          style: AppTypography.heading.copyWith(fontSize: 20),
         ),
-        body: Stack(
-          children: [
-            const AppBg(),
-            Obx(() {
-              if (controller.isLoading.value) {
-                return const Center(child: CircularProgressIndicator());
-              }
-              if (availableCategories.isEmpty) {
-                return const Center(child: Text("No categories available"));
-              }
-              return GridView.count(
-                padding: const EdgeInsets.all(16),
-                crossAxisCount: 4,
-                childAspectRatio: 0.8,
-                mainAxisSpacing: 12,
-                crossAxisSpacing: 12,
-                children: availableCategories.map((cat) {
-                  final style = categoryStyles[cat] ??
-                      {
-                        "icon": Icons.category,
-                        "bgColor": AppColors.lightGrey,
-                        "iconColor": AppColors.dark,
-                      };
-                  return _buildCategoryItem(
-                    context,
-                    cat,
-                    style["icon"] as IconData,
-                    style["bgColor"] as Color,
-                    style["iconColor"] as Color,
-                    () {
-                      controller.filterByCategory(cat);
-                      Get.back();
-                    },
-                  );
-                }).toList(),
-              );
-            }),
-          ],
-        ));
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Get.back(),
+        ),
+      ),
+      body: Stack(
+        children: [
+          const AppBg(),
+          Obx(() {
+            // Show loading only if categories are being fetched initially
+            if (controller.isLoading.value && controller.categories.isEmpty) {
+              return const Center(child: CircularProgressIndicator());
+            }
+
+            final List<Map<String, dynamic>> availableCategories =
+                controller.categories.isNotEmpty
+                    ? controller.categories
+                    : categoryStyles.keys
+                        .map((name) => {'id': null, 'name': name})
+                        .toList();
+
+            if (availableCategories.isEmpty) {
+              return const Center(child: Text("No categories available"));
+            }
+
+            return GridView.count(
+              padding: const EdgeInsets.all(16),
+              crossAxisCount: 4,
+              childAspectRatio: 0.8,
+              mainAxisSpacing: 12,
+              crossAxisSpacing: 12,
+              children: availableCategories.map((cat) {
+                final catName = cat['name'] as String;
+                final style = categoryStyles[catName] ??
+                    {
+                      "icon": Icons.category,
+                      "bgColor": AppColors.lightGrey,
+                      "iconColor": AppColors.dark,
+                    };
+                return _buildCategoryItem(
+                  context,
+                  catName,
+                  style["icon"] as IconData,
+                  style["bgColor"] as Color,
+                  style["iconColor"] as Color,
+                  () {
+                    final filterValue = cat['id']?.toString() ?? catName;
+                    controller.filterByCategory(filterValue);
+                    Get.back();
+                  },
+                );
+              }).toList(),
+            );
+          }),
+        ],
+      ),
+    );
   }
 
   Widget _buildCategoryItem(

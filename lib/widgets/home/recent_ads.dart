@@ -11,15 +11,6 @@ class RecentAds extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final HomeController controller = Get.find<HomeController>();
-    final ScrollController scrollController = ScrollController();
-
-    scrollController.addListener(() {
-      if (scrollController.position.pixels >=
-              scrollController.position.maxScrollExtent - 200 &&
-          !controller.isLoadingMore.value) {
-        controller.loadMoreAds();
-      }
-    });
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -43,10 +34,19 @@ class RecentAds extends StatelessWidget {
                   : Column(
                       children: [
                         SizedBox(
-                          height: MediaQuery.of(context).size.height *
-                              0.6, // Dynamic height
+                          height: MediaQuery.of(context).size.height * 0.6,
                           child: ListView.builder(
-                            controller: scrollController,
+                            controller: ScrollController()
+                              ..addListener(() {
+                                if (controller
+                                            .scrollController.position.pixels >=
+                                        controller.scrollController.position
+                                                .maxScrollExtent -
+                                            200 &&
+                                    !controller.isLoadingMore.value) {
+                                  controller.loadMoreAds();
+                                }
+                              }),
                             physics: const AlwaysScrollableScrollPhysics(),
                             itemCount: controller.ads.length,
                             itemBuilder: (context, index) {
@@ -56,29 +56,22 @@ class RecentAds extends StatelessWidget {
                                     horizontal: 16.0, vertical: 8.0),
                                 child: AdCard(
                                   title: ad['title'] ?? 'Untitled',
-                                  price: double.tryParse(
-                                          ad['price']?.toString() ?? '0') ??
-                                      0.0,
-                                  itemCondition: ad['item_condition'] ??
-                                      ad['condition'] ??
-                                      'Unknown',
+                                  price: ad['price'] as double? ?? 0.0,
+                                  itemCondition:
+                                      ad['item_condition'] ?? 'Unknown',
                                   imageUrl: ad['images']?.isNotEmpty == true
                                       ? ad['images'][0]
                                       : null,
                                   location: ad['location'] ?? 'Unknown',
-                                  isVerified: ad['verified'] ?? false,
+                                  isVerified:
+                                      false, // Backend doesn’t support yet
                                   isFavorite: controller.favoriteAds
                                       .any((fav) => fav['id'] == ad['id']),
                                   onTap: () {
                                     Get.toNamed("/ad-detail", arguments: ad);
                                   },
-                                  onFavoriteToggle: () {
-                                    Get.snackbar(
-                                      "Favorite",
-                                      "${ad['title']} favorite toggle coming soon!",
-                                      snackPosition: SnackPosition.TOP,
-                                    );
-                                  },
+                                  onFavoriteToggle: () => controller
+                                      .toggleFavorite(ad['id'].toString()),
                                 ),
                               );
                             },
@@ -99,56 +92,42 @@ class RecentAds extends StatelessWidget {
     );
   }
 
-  Widget _buildLoadingState() {
-    return const Padding(
-      padding: EdgeInsets.all(16.0),
-      child: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            CircularProgressIndicator(color: AppColors.dark),
-            SizedBox(height: 16),
-            Text(
-              "Loading recent ads...",
-              style: TextStyle(fontSize: 16, color: AppColors.grey),
-            ),
-          ],
+  Widget _buildLoadingState() => const Padding(
+        padding: EdgeInsets.all(16.0),
+        child: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CircularProgressIndicator(color: AppColors.dark),
+              SizedBox(height: 16),
+              Text("Loading recent ads...",
+                  style: TextStyle(fontSize: 16, color: AppColors.grey)),
+            ],
+          ),
         ),
-      ),
-    );
-  }
+      );
 
-  Widget _buildEmptyState() {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(
-              Icons.hourglass_empty,
-              size: 40,
-              color: Colors.grey,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              "No recent ads available",
-              style: AppTypography.body.copyWith(
-                fontSize: 16,
-                color: Colors.grey[600],
+  Widget _buildEmptyState() => Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.hourglass_empty, size: 40, color: Colors.grey),
+              const SizedBox(height: 8),
+              Text(
+                "No recent ads available",
+                style: AppTypography.body
+                    .copyWith(fontSize: 16, color: Colors.grey[600]),
               ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              "Check back later for new listings!",
-              style: AppTypography.caption.copyWith(
-                fontSize: 12,
-                color: Colors.grey[500],
+              const SizedBox(height: 4),
+              Text(
+                "Check back later for new listings!",
+                style: AppTypography.caption 
+                    .copyWith(fontSize: 12, color: Colors.grey[500]),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
-      ),
-    );
-  }
+      );    
 }
