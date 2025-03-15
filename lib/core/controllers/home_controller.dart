@@ -18,8 +18,7 @@ class HomeController extends GetxController {
   final Rx<String?> selectedCategory = Rx<String?>(null);
   final RxInt currentPage = 1.obs;
   final RxBool hasMoreAds = true.obs;
-  final int pageSize = 10;
-
+  static const int pageSize = 10;
   static const String baseUrl = 'http://localhost/vavuniya_ads';
 
   @override
@@ -27,6 +26,14 @@ class HomeController extends GetxController {
     super.onInit();
     _checkFirstVisit();
     fetchInitialData();
+    scrollController.addListener(_scrollListener);
+  }
+
+  @override
+  void onClose() {
+    scrollController.removeListener(_scrollListener);
+    scrollController.dispose();
+    super.onClose();
   }
 
   Future<void> _checkFirstVisit() async {
@@ -45,22 +52,27 @@ class HomeController extends GetxController {
     await Future.wait([
       fetchCategories(),
       fetchAds(),
+      fetchFavorites(), // Added to sync favorites
     ]);
     isLoading.value = false;
   }
 
   Future<void> fetchCategories() async {
     try {
-      isLoading.value = true;
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('token') ?? '';
       final response = await http.post(
         Uri.parse('$baseUrl/api/categories/list'),
-        headers: {'Content-Type': 'application/json'},
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
       );
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         categories.assignAll(List<Map<String, dynamic>>.from(data['data']));
       } else {
-        throw jsonDecode(response.body)['message'] ??
+        throw jsonDecode(response.body)['error'] ??
             'Failed to fetch categories';
       }
     } catch (e) {
@@ -69,11 +81,9 @@ class HomeController extends GetxController {
         categories.assignAll([
           {'id': 1, 'name': 'Electronics'},
           {'id': 2, 'name': 'Vehicles'},
-          {'id': 3, 'name': 'Furniture'}
+          {'id': 3, 'name': 'Furniture'},
         ]);
       }
-    } finally {
-      isLoading.value = false;
     }
   }
 
@@ -109,118 +119,124 @@ class HomeController extends GetxController {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        final newAds = _formatAds(List<dynamic>.from(data['ads']));
+        final newAds = List<Map<String, dynamic>>.from(data['ads'])
+            .map(_formatAd)
+            .toList();
         if (loadMore) {
           ads.addAll(newAds);
         } else {
           ads.assignAll(newAds);
         }
-        hasMoreAds.value = newAds.length == pageSize;
+        hasMoreAds.value = data['has_more'] ?? newAds.length == pageSize;
         if (hasMoreAds.value && loadMore) currentPage.value++;
       } else {
         throw jsonDecode(response.body)['error'] ?? 'Failed to fetch ads';
       }
     } catch (e) {
       _handleError("Failed to load ads: $e");
-      if (isInitialLoad && ads.isEmpty) {
-        ads.assignAll([]);
-      }
+      if (isInitialLoad && ads.isEmpty) ads.assignAll([]);
     } finally {
-      isLoading.value = false;
+      if (isInitialLoad) isLoading.value = false;
       isLoadingMore.value = false;
     }
   }
 
-  List<Map<String, dynamic>> _formatAds(List<dynamic> rawAds) {
-    return rawAds
-        .map((ad) => {
-              'id': ad['id']?.toString() ?? '',
-              'title': ad['title'] ?? 'Untitled',
-              'price': double.tryParse(ad['price']?.toString() ?? '0') ?? 0.0,
-              'item_condition': ad['condition'] ?? 'Unknown',
-              'images':
-                  ad['images'] != null ? List<String>.from(ad['images']) : [],
-              'location': ad['location'] ?? 'Unknown',
-              'verified': ad['verified'] ?? false,
-              'is_favorite': favoriteAds.any((fav) => fav['id'] == ad['id']),
-            })
-        .toList();
+  Map<String, dynamic> _formatAd(Map<String, dynamic> ad) {
+    return {
+      'id': ad['id']?.toString() ?? '',
+      'title': ad['title'] ?? 'Untitled',
+      'price': double.tryParse(ad['price']?.toString() ?? '0') ?? 0.0,
+      'item_condition': ad['item_condition'] ?? 'Unknown',
+      'images': ad['images'] != null ? List<String>.from(ad['images']) : [],
+      'location': ad['location'] ?? 'Unknown',
+      'description': ad['description'] ?? '',
+      'status': ad['status'] ?? 'Unknown',
+      'user_id': ad['user_id']?.toString() ?? '',
+      'category_id': ad['category_id']?.toString(),
+      'is_favorite': ad['is_favorite'] ?? false,
+      'created_at': ad['created_at'] ?? '',
+      'updated_at': ad['updated_at'] ?? '',
+    };
+  }
+
+  Future<void> fetchFavorites() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('token') ?? '';
+      final response = await http.get(
+        Uri.parse('$baseUrl/api/favorites/list'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        favoriteAds
+            .assignAll(List<Map<String, dynamic>>.from(data['favorites']));
+      } else {
+        throw jsonDecode(response.body)['error'] ?? 'Failed to fetch favorites';
+      }
+    } catch (e) {
+      _handleError("Failed to load favorites: $e");
+    }
   }
 
   Future<void> toggleFavorite(String adId) async {
     try {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('token') ?? '';
-      final userId =
-          prefs.getString('user_id') ?? '1'; // Adjust based on JWT payload
       final response = await http.post(
         Uri.parse('$baseUrl/api/favorites/toggle'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
         },
-        body: jsonEncode({'user_id': userId, 'ad_id': adId}),
+        body: jsonEncode({'ad_id': adId}),
       );
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        final adIndex = ads.indexWhere((ad) => ad['id'].toString() == adId);
+        final isFavorite = data['is_favorite'] ?? false;
+        final adIndex = ads.indexWhere((ad) => ad['id'] == adId);
         if (adIndex != -1) {
-          if (data['is_favorite']) {
+          ads[adIndex]['is_favorite'] = isFavorite;
+          if (isFavorite) {
             favoriteAds.add(ads[adIndex]);
           } else {
-            favoriteAds.removeWhere((fav) => fav['id'].toString() == adId);
+            favoriteAds.removeWhere((fav) => fav['id'] == adId);
           }
           ads.refresh();
           favoriteAds.refresh();
         }
       } else {
-        throw jsonDecode(response.body)['message'] ??
-            'Failed to toggle favorite';
+        throw jsonDecode(response.body)['error'] ?? 'Failed to toggle favorite';
       }
     } catch (e) {
       _handleError("Failed to toggle favorite: $e");
     }
   }
 
-  Future<void> createAd(Map<String, dynamic> adData) async {
+  Future<Map<String, dynamic>?> fetchAdDetail(String adId) async {
     try {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('token') ?? '';
-      final userId = prefs.getString('user_id') ?? '1'; // Adjust based on JWT
       final response = await http.post(
-        Uri.parse('$baseUrl/api/ads/create'),
+        Uri.parse('$baseUrl/api/ads/show?id=$adId'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
         },
-        body: jsonEncode({...adData, 'user_id': userId}),
-      );
-
-      if (response.statusCode == 201) {
-        fetchAds(); // Refresh ads list
-        Get.snackbar("Success", "Ad created successfully!");
-      } else {
-        throw jsonDecode(response.body)['message'] ?? 'Failed to create ad';
-      }
-    } catch (e) {
-      _handleError("Failed to create ad: $e");
-    }
-  }
-
-  Future<Map<String, dynamic>?> fetchAdDetail(String adId) async {
-    try {
-      final response = await http.post(
-        Uri.parse('$baseUrl/api/ads/show?id=$adId'),
-        headers: {'Content-Type': 'application/json'},
       );
       if (response.statusCode == 200) {
-        return jsonDecode(response.body)['data'];
+        final data = jsonDecode(response.body);
+        return _formatAd(data); // No 'data' wrapper from backend
       } else {
-        throw jsonDecode(response.body)['message'] ?? 'Failed to fetch ad';
+        throw jsonDecode(response.body)['error'] ??
+            'Failed to fetch ad details';
       }
     } catch (e) {
-      _handleError("Failed to fetch ad: $e");
+      _handleError("Failed to fetch ad details: $e");
       return null;
     }
   }
@@ -229,21 +245,21 @@ class HomeController extends GetxController {
     try {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('token') ?? '';
-      final userId = prefs.getString('user_id') ?? '1';
-      final response = await http.put(
+      final response = await http.post(
+        // Changed to POST to match backend
         Uri.parse('$baseUrl/api/ads/update'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
         },
-        body: jsonEncode({...adData, 'id': adId, 'user_id': userId}),
+        body: jsonEncode({'id': adId, ...adData}),
       );
 
       if (response.statusCode == 200) {
-        fetchAds(); // Refresh list
+        await fetchAds(); // Refresh list
         Get.snackbar("Success", "Ad updated successfully!");
       } else {
-        throw jsonDecode(response.body)['message'] ?? 'Failed to update ad';
+        throw jsonDecode(response.body)['error'] ?? 'Failed to update ad';
       }
     } catch (e) {
       _handleError("Failed to update ad: $e");
@@ -254,48 +270,82 @@ class HomeController extends GetxController {
     try {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('token') ?? '';
-      final userId = prefs.getString('user_id') ?? '1';
-      final response = await http.delete(
+      final response = await http.post(
+        // Changed to POST to match backend
         Uri.parse('$baseUrl/api/ads/delete'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
         },
-        body: jsonEncode({'id': adId, 'user_id': userId}),
+        body: jsonEncode({'id': adId}),
       );
 
       if (response.statusCode == 200) {
-        ads.removeWhere((ad) => ad['id'].toString() == adId);
+        ads.removeWhere((ad) => ad['id'] == adId);
+        favoriteAds.removeWhere((fav) => fav['id'] == adId);
         ads.refresh();
         Get.snackbar("Success", "Ad deleted successfully!");
       } else {
-        throw jsonDecode(response.body)['message'] ?? 'Failed to delete ad';
+        throw jsonDecode(response.body)['error'] ?? 'Failed to delete ad';
       }
     } catch (e) {
       _handleError("Failed to delete ad: $e");
     }
   }
 
+  Future<void> createAd(Map<String, dynamic> adData) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('token') ?? '';
+      final response = await http.post(
+        Uri.parse('$baseUrl/api/ads/create'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode(adData),
+      );
+
+      if (response.statusCode == 201) {
+        await fetchAds();
+        Get.snackbar("Success", "Ad created successfully!");
+      } else {
+        throw jsonDecode(response.body)['error'] ?? 'Failed to create ad';
+      }
+    } catch (e) {
+      _handleError("Failed to create ad: $e");
+    }
+  }
+
   void filterByCategory(String? category) {
     selectedCategory.value = category;
     fetchAds(
-        categoryId: category,
-        search: searchQuery.value.isNotEmpty ? searchQuery.value : null);
+      categoryId: category,
+      search: searchQuery.value.isNotEmpty ? searchQuery.value : null,
+    );
   }
 
   void searchAds(String query) {
     searchQuery.value = query;
     fetchAds(
-        categoryId: selectedCategory.value,
-        search: query.isNotEmpty ? query : null);
+      categoryId: selectedCategory.value,
+      search: query.isNotEmpty ? query : null,
+    );
   }
 
-  Future<void> loadMoreAds() {
-    return fetchAds(
-      categoryId: selectedCategory.value,
-      search: searchQuery.value.isNotEmpty ? searchQuery.value : null,
-      loadMore: true,
-    );
+  Future<void> loadMoreAds() => fetchAds(
+        categoryId: selectedCategory.value,
+        search: searchQuery.value.isNotEmpty ? searchQuery.value : null,
+        loadMore: true,
+      );
+
+  void _scrollListener() {
+    if (scrollController.position.pixels >=
+            scrollController.position.maxScrollExtent - 200 &&
+        hasMoreAds.value &&
+        !isLoadingMore.value) {
+      loadMoreAds();
+    }
   }
 
   Future<void> logout() async {

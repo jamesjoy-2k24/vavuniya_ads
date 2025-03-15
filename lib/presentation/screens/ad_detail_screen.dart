@@ -5,65 +5,87 @@ import 'package:vavuniya_ads/core/controllers/home_controller.dart';
 import 'package:vavuniya_ads/widgets/app/app_color.dart';
 import 'package:vavuniya_ads/widgets/app/app_typography.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:share_plus/share_plus.dart';
 
 class AdDetailScreen extends StatelessWidget {
   const AdDetailScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final HomeController controller = Get.find<HomeController>();
-    final Map<String, dynamic> ad = Get.arguments ?? {};
+    final HomeController controller = Get.put(HomeController());
+    final Rx<Map<String, dynamic>> ad =
+        Rx<Map<String, dynamic>>(Get.arguments ?? {});
+
+    // Fetch fresh ad details on load
+    _fetchAdDetails(controller, ad);
 
     return Scaffold(
       body: Obx(
-        () => controller.isLoading.value
+        () => controller.isLoading.value && ad.value.isEmpty
             ? const Center(
                 child: CircularProgressIndicator(color: AppColors.dark))
             : CustomScrollView(
                 slivers: [
-                  _buildAppBar(context, controller, ad),
+                  _buildAppBar(context, ad),
                   SliverToBoxAdapter(
                     child: Padding(
                       padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _buildTitlePrice(ad),
-                          const SizedBox(height: 16),
-                          _buildImageCarousel(ad),
-                          const SizedBox(height: 16),
-                          _buildDetails(ad),
-                          const SizedBox(height: 16),
-                          _buildDescription(ad),
-                          const SizedBox(height: 24),
-                          FutureBuilder<Widget>(
-                            future:
-                                _buildActionButtons(context, controller, ad),
-                            builder: (context, snapshot) {
-                              if (snapshot.connectionState ==
-                                  ConnectionState.waiting) {
-                                return const Center(
-                                    child: CircularProgressIndicator());
-                              } else if (snapshot.hasError) {
-                                return const Center(
-                                    child: Text('Error loading actions'));
-                              } else {
-                                return snapshot.data ?? const SizedBox.shrink();
-                              }
-                            },
-                          ),
-                        ],
+                      child: FadeTransition(
+                        opacity: const AlwaysStoppedAnimation(1.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _buildTitlePrice(ad),
+                            const SizedBox(height: 16),
+                            _buildImageCarousel(context, ad),
+                            const SizedBox(height: 16),
+                            _buildDetails(ad),
+                            const SizedBox(height: 16),
+                            _buildDescription(ad),
+                          ],
+                        ),
                       ),
                     ),
                   ),
                 ],
               ),
       ),
+      floatingActionButton: Obx(
+        () => FloatingActionButton(
+          onPressed: ad.value['id'] != null
+              ? () => controller.toggleFavorite(ad.value['id'].toString())
+              : null,
+          backgroundColor:
+              ad.value['id'] != null ? AppColors.primary : AppColors.grey,
+          child: Icon(
+            ad.value['is_favorite'] == true
+                ? Icons.favorite
+                : Icons.favorite_border,
+            color: Colors.white,
+          ),
+        ),
+      ),
+      bottomNavigationBar: FutureBuilder<Widget>(
+        future: _buildBottomActions(context, controller, ad),
+        builder: (context, snapshot) =>
+            snapshot.connectionState == ConnectionState.done && snapshot.hasData
+                ? snapshot.data!
+                : const SizedBox.shrink(),
+      ),
     );
   }
 
-  SliverAppBar _buildAppBar(BuildContext context, HomeController controller,
-      Map<String, dynamic> ad) {
+  void _fetchAdDetails(HomeController controller, Rx<Map<String, dynamic>> ad) {
+    if (ad.value['id'] != null) {
+      controller.fetchAdDetail(ad.value['id'].toString()).then((freshAd) {
+        if (freshAd != null) {
+          ad.value = freshAd;
+        }
+      });
+    }
+  }
+
+  SliverAppBar _buildAppBar(BuildContext context, Rx<Map<String, dynamic>> ad) {
     return SliverAppBar(
       expandedHeight: 200.0,
       floating: false,
@@ -71,72 +93,129 @@ class AdDetailScreen extends StatelessWidget {
       backgroundColor: AppColors.primary,
       flexibleSpace: FlexibleSpaceBar(
         title: Text(
-          ad['title'] ?? 'Untitled',
+          ad.value['title'] ?? 'Untitled',
           style: AppTypography.subheading.copyWith(color: Colors.white),
+          overflow: TextOverflow.ellipsis,
         ),
-        background: ad['images']?.isNotEmpty == true
-            ? Image.network(ad['images'][0], fit: BoxFit.cover)
+        background: (ad.value['images'] as List?)?.isNotEmpty == true
+            ? Image.network(ad.value['images'][0], fit: BoxFit.cover)
             : Container(color: AppColors.grey),
       ),
       actions: [
         IconButton(
-          icon: Icon(
-            controller.favoriteAds.any((fav) => fav['id'] == ad['id'])
-                ? Icons.favorite
-                : Icons.favorite_border,
-            color: Colors.redAccent,
+          icon: const Icon(Icons.share, color: Colors.white),
+          onPressed: () => Share.share(
+            'Check out this ad: ${ad.value['title']} - LKR ${ad.value['price']?.toStringAsFixed(2) ?? '0.00'} at ${ad.value['location'] ?? 'Unknown'}',
           ),
-          onPressed: () => controller.toggleFavorite(ad['id'].toString()),
         ),
       ],
     );
   }
 
-  Widget _buildTitlePrice(Map<String, dynamic> ad) {
+  Widget _buildTitlePrice(Rx<Map<String, dynamic>> ad) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Expanded(
           child: Text(
-            ad['title'] ?? 'Untitled',
-            style: AppTypography.heading
-                .copyWith(fontSize: 24, color: AppColors.textPrimary),
+            ad.value['title'] ?? 'Untitled',
+            style: AppTypography.heading.copyWith(
+              fontSize: 24,
+              color: AppColors.textPrimary,
+            ),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
           ),
         ),
         Text(
-          "LKR ${ad['price']?.toStringAsFixed(2) ?? '0.00'}",
-          style: AppTypography.subheading
-              .copyWith(fontSize: 20, color: AppColors.primary),
+          "LKR ${ad.value['price']?.toStringAsFixed(2) ?? '0.00'}",
+          style: AppTypography.subheading.copyWith(
+            fontSize: 20,
+            color: AppColors.primary,
+          ),
         ),
       ],
     );
   }
 
-  Widget _buildImageCarousel(Map<String, dynamic> ad) {
-    final images = ad['images'] as List<dynamic>? ?? [];
+  Widget _buildImageCarousel(
+      BuildContext context, Rx<Map<String, dynamic>> ad) {
+    final images = (ad.value['images'] as List?)?.cast<String>() ?? [];
     return images.isEmpty
         ? Container(
             height: 200,
             color: AppColors.grey,
             child: const Center(
-                child:
-                    Text("No Images", style: TextStyle(color: Colors.white))),
-          )
-        : CarouselSlider(
-            options: CarouselOptions(
-              height: 200,
-              autoPlay: true,
-              enlargeCenterPage: true,
-              aspectRatio: 16 / 9,
-              viewportFraction: 0.8,
+              child: Text("No Images", style: TextStyle(color: Colors.white)),
             ),
-            items: images
-                .map((imageUrl) => Image.network(imageUrl, fit: BoxFit.cover))
-                .toList(),
+          )
+        : Column(
+            children: [
+              CarouselSlider(
+                options: CarouselOptions(
+                  height: 200,
+                  autoPlay: images.length > 1,
+                  enlargeCenterPage: true,
+                  aspectRatio: 16 / 9,
+                  viewportFraction: 0.8,
+                  enableInfiniteScroll: images.length > 1,
+                  onPageChanged: (index, reason) =>
+                      ad.value['currentImageIndex'] = index,
+                ),
+                items: images.map((imageUrl) {
+                  return GestureDetector(
+                    onTap: () => _showFullScreenImage(context, imageUrl),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: Image.network(
+                        imageUrl,
+                        fit: BoxFit.cover,
+                        width: double.infinity,
+                        errorBuilder: (_, __, ___) =>
+                            const Icon(Icons.broken_image, size: 50),
+                      ),
+                    ),
+                  );
+                }).toList(),
+              ),
+              if (images.length > 1) ...[
+                const SizedBox(height: 8),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: images.map((url) {
+                    final index = images.indexOf(url);
+                    return Container(
+                      width: 8.0,
+                      height: 8.0,
+                      margin: const EdgeInsets.symmetric(horizontal: 4.0),
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: index == (ad.value['currentImageIndex'] ?? 0)
+                            ? AppColors.primary
+                            : AppColors.grey,
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ],
+            ],
           );
   }
 
-  Widget _buildDetails(Map<String, dynamic> ad) {
+  void _showFullScreenImage(BuildContext context, String imageUrl) {
+    Get.dialog(
+      GestureDetector(
+        onTap: Get.back,
+        child: InteractiveViewer(
+          child: Image.network(imageUrl, fit: BoxFit.contain),
+        ),
+      ),
+      barrierDismissible: true,
+    );
+  }
+
+  Widget _buildDetails(Rx<Map<String, dynamic>> ad) {
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -145,14 +224,17 @@ class AdDetailScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            _buildDetailRow(Icons.location_on, "Location",
+                ad.value['location'] ?? 'Unknown'),
+            _buildDetailRow(Icons.build, "Condition",
+                ad.value['item_condition'] ?? 'Unknown'),
             _buildDetailRow(
-                Icons.location_on, "Location", ad['location'] ?? 'Unknown'),
+                Icons.calendar_today,
+                "Posted",
+                ad.value['created_at']?.toString().substring(0, 10) ??
+                    'Unknown'),
             _buildDetailRow(
-                Icons.build, "Condition", ad['item_condition'] ?? 'Unknown'),
-            _buildDetailRow(Icons.calendar_today, "Posted",
-                ad['created_at']?.substring(0, 10) ?? 'Unknown'),
-            _buildDetailRow(
-                Icons.verified, "Status", ad['is_verified'] ?? 'Unknown'),
+                Icons.verified, "Status", ad.value['status'] ?? 'Unknown'),
           ],
         ),
       ),
@@ -174,7 +256,7 @@ class AdDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildDescription(Map<String, dynamic> ad) {
+  Widget _buildDescription(Rx<Map<String, dynamic>> ad) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -182,69 +264,81 @@ class AdDetailScreen extends StatelessWidget {
             style: AppTypography.subheading.copyWith(fontSize: 18)),
         const SizedBox(height: 8),
         Text(
-          ad['description'] ?? 'No description available.',
+          ad.value['description'] ?? 'No description available.',
           style: AppTypography.body.copyWith(color: AppColors.textSecondary),
         ),
       ],
     );
   }
 
-  Future<Widget> _buildActionButtons(BuildContext context,
-      HomeController controller, Map<String, dynamic> ad) async {
-    final userId = (await SharedPreferences.getInstance())
-        .getString('user_id'); // Adjust based on your auth
-    final isOwner = userId != null && userId == ad['user_id'].toString();
+  Future<Widget> _buildBottomActions(BuildContext context,
+      HomeController controller, Rx<Map<String, dynamic>> ad) async {
+    final prefs = await SharedPreferences.getInstance();
+    final userId = prefs.getString('user_id');
+    final isOwner = userId != null && userId == ad.value['user_id']?.toString();
 
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: [
-        ElevatedButton.icon(
-          onPressed: () =>
-              Get.snackbar("Contact", "Contact seller feature coming soon!"),
-          icon: const Icon(Icons.message),
-          label: const Text("Contact Seller"),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.primary,
-            foregroundColor: Colors.white,
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-          ),
+    return BottomAppBar(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            ElevatedButton.icon(
+              onPressed: () => Get.snackbar(
+                "Contact",
+                "Contact seller feature coming soon!",
+                snackPosition: SnackPosition.BOTTOM,
+              ),
+              icon: const Icon(Icons.message),
+              label: const Text("Contact Seller"),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8)),
+              ),
+            ),
+            PopupMenuButton<String>(
+              onSelected: (value) {
+                switch (value) {
+                  case 'edit':
+                    if (isOwner) _showEditDialog(context, controller, ad);
+                    break;
+                  case 'delete':
+                    if (isOwner)
+                      _confirmDelete(
+                          context, controller, ad.value['id'].toString());
+                    break;
+                  case 'report':
+                    Get.snackbar("Report", "Report ad feature coming soon!");
+                    break;
+                }
+              },
+              itemBuilder: (context) => [
+                if (isOwner)
+                  const PopupMenuItem(value: 'edit', child: Text("Edit")),
+                if (isOwner)
+                  const PopupMenuItem(value: 'delete', child: Text("Delete")),
+                const PopupMenuItem(value: 'report', child: Text("Report Ad")),
+              ],
+              icon: const Icon(Icons.more_vert),
+            ),
+          ],
         ),
-        if (isOwner) ...[
-          ElevatedButton.icon(
-            onPressed: () => _showEditDialog(context, controller, ad),
-            icon: const Icon(Icons.edit),
-            label: const Text("Edit"),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.secondary,
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8)),
-            ),
-          ),
-          ElevatedButton.icon(
-            onPressed: () =>
-                _confirmDelete(context, controller, ad['id'].toString()),
-            icon: const Icon(Icons.delete),
-            label: const Text("Delete"),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.redAccent,
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8)),
-            ),
-          ),
-        ],
-      ],
+      ),
     );
   }
 
   void _showEditDialog(BuildContext context, HomeController controller,
-      Map<String, dynamic> ad) {
-    final titleController = TextEditingController(text: ad['title']);
-    final descController = TextEditingController(text: ad['description']);
+      Rx<Map<String, dynamic>> ad) {
+    final titleController = TextEditingController(text: ad.value['title']);
+    final descController = TextEditingController(text: ad.value['description']);
     final priceController =
-        TextEditingController(text: ad['price']?.toString());
+        TextEditingController(text: ad.value['price']?.toString());
+    final locationController =
+        TextEditingController(text: ad.value['location']);
+    final conditionController =
+        TextEditingController(text: ad.value['item_condition']);
 
     Get.dialog(
       AlertDialog(
@@ -267,22 +361,45 @@ class AdDetailScreen extends StatelessWidget {
                 decoration: const InputDecoration(labelText: "Price (LKR)"),
                 keyboardType: TextInputType.number,
               ),
+              TextField(
+                controller: locationController,
+                decoration: const InputDecoration(labelText: "Location"),
+              ),
+              DropdownButtonFormField<String>(
+                value: conditionController.text.isNotEmpty
+                    ? conditionController.text
+                    : null,
+                decoration: const InputDecoration(labelText: "Condition"),
+                items: ['new', 'used']
+                    .map((condition) => DropdownMenuItem(
+                          value: condition,
+                          child: Text(condition.capitalize!),
+                        ))
+                    .toList(),
+                onChanged: (value) =>
+                    conditionController.text = value ?? 'used',
+              ),
             ],
           ),
         ),
         actions: [
-          TextButton(
-            onPressed: () => Get.back(),
-            child: const Text("Cancel"),
-          ),
+          TextButton(onPressed: Get.back, child: const Text("Cancel")),
           TextButton(
             onPressed: () {
-              controller.updateAd(ad['id'].toString(), {
+              final updatedData = {
                 'title': titleController.text,
                 'description': descController.text,
-                'price': double.tryParse(priceController.text) ?? ad['price'],
+                'price':
+                    double.tryParse(priceController.text) ?? ad.value['price'],
+                'location': locationController.text,
+                'item_condition': conditionController.text,
+              };
+              controller
+                  .updateAd(ad.value['id'].toString(), updatedData)
+                  .then((_) {
+                ad.value = {...ad.value, ...updatedData};
+                Get.back();
               });
-              Get.back();
             },
             child: const Text("Save"),
           ),
@@ -298,15 +415,12 @@ class AdDetailScreen extends StatelessWidget {
         title: const Text("Confirm Delete"),
         content: const Text("Are you sure you want to delete this ad?"),
         actions: [
-          TextButton(
-            onPressed: () => Get.back(),
-            child: const Text("Cancel"),
-          ),
+          TextButton(onPressed: Get.back, child: const Text("Cancel")),
           TextButton(
             onPressed: () {
               controller.deleteAd(adId);
               Get.back();
-              Get.back(); // Return to previous screen
+              Get.back();
             },
             child: const Text("Delete", style: TextStyle(color: Colors.red)),
           ),
