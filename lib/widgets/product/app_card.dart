@@ -1,237 +1,162 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:flutter_animate/flutter_animate.dart';
+import 'package:vavuniya_ads/core/controllers/home/favorites_controller.dart';
 import 'package:vavuniya_ads/widgets/app/app_color.dart';
 import 'package:vavuniya_ads/widgets/app/app_typography.dart';
 
 class AdCard extends StatelessWidget {
-  final String title;
-  final double price;
-  final String itemCondition;
-  final String? imageUrl;
-  final String? location;
-  final bool isVerified; // New: For verified badge
-  final bool isFavorite; // New: Favorite state
-  final VoidCallback onTap;
-  final VoidCallback? onFavoriteToggle; // New: Toggle favorite action
+  final Map<String, dynamic> ad;
+  final VoidCallback? onTap; // Navigate to ad details
+  final VoidCallback? onEdit; // For MyAds
+  final VoidCallback? onDelete; // For MyAds
+  final bool showFavoriteToggle; // Show/hide favorite icon
+  final int animationIndex; // For staggered animations
 
   const AdCard({
     super.key,
-    required this.title,
-    required this.price,
-    required this.itemCondition,
-    this.imageUrl,
-    this.location,
-    this.isVerified = false,
-    this.isFavorite = false,
-    required this.onTap,
-    this.onFavoriteToggle,
+    required this.ad,
+    this.onTap,
+    this.onEdit,
+    this.onDelete,
+    this.showFavoriteToggle = true,
+    this.animationIndex = 0,
   });
 
   @override
   Widget build(BuildContext context) {
+    final favoritesController = Get.find<FavoritesController>();
+
     return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        curve: Curves.easeInOut,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              blurRadius: 8,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
+      onTap: onTap ?? () => Get.toNamed("/ad/${ad['ad_id']}"),
+      child: Container(
+        width: 200, // Adjustable for horizontal lists
+        margin: const EdgeInsets.only(right: 12, bottom: 12),
         child: Card(
-          elevation: 0, // Shadow handled by BoxDecoration
+          elevation: 2,
           shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          clipBehavior: Clip.antiAlias,
-          child: Stack(
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Main Content
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Image with Gradient Overlay
-                  Stack(
-                    children: [
-                      Container(
-                        width: double.infinity,
-                        height: 130, // Taller for better visual appeal
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                            colors: [
-                              Colors.transparent,
-                              Colors.black.withOpacity(0.4),
-                            ],
-                          ),
-                        ),
-                        child: ClipRRect(
-                          borderRadius: const BorderRadius.vertical(
-                              top: Radius.circular(16)),
-                          child: imageUrl != null && imageUrl!.isNotEmpty
-                              ? Image.network(
-                                  imageUrl!,
-                                  width: double.infinity,
-                                  height: 130,
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (context, error, stackTrace) =>
-                                      _imagePlaceholder(),
-                                )
-                              : _imagePlaceholder(),
-                        ),
-                      ),
-                      // Price Tag on Image
-                      Positioned(
-                        bottom: 8,
-                        left: 8,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 8, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: AppColors.dark.withOpacity(0.85),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Text(
-                            "LKR ${price.toStringAsFixed(2)}",
-                            style: AppTypography.caption.copyWith(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 12,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  // Details
-                  Padding(
-                    padding: const EdgeInsets.all(10.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+              // Image (placeholder or network image if available)
+              ClipRRect(
+                borderRadius:
+                    const BorderRadius.vertical(top: Radius.circular(12)),
+                child: Container(
+                  height: 120,
+                  width: double.infinity,
+                  color: AppColors.lightGrey, // Placeholder
+                  child: ad['images'] != null && ad['images'].isNotEmpty
+                      ? Image.network(
+                          'http://localhost/vavuniya_ads/images/${ad['images']}',
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) =>
+                              const Icon(Icons.broken_image, size: 50),
+                        )
+                      : const Icon(Icons.image,
+                          size: 50, color: AppColors.grey),
+                ),
+              ),
+              // Content
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      ad['title'],
+                      style: AppTypography.body
+                          .copyWith(fontWeight: FontWeight.bold, fontSize: 16),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      ad['description'],
+                      style: AppTypography.caption
+                          .copyWith(fontSize: 14, color: AppColors.grey),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Text(
-                                title,
-                                style: AppTypography.body.copyWith(
-                                  fontWeight: FontWeight.w700,
-                                  fontSize: 16,
-                                  color: AppColors.textPrimary,
-                                ),
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                            if (isVerified)
-                              const Padding(
-                                padding: EdgeInsets.only(left: 6.0),
-                                child: Icon(Icons.verified,
-                                    color: Colors.blue, size: 18),
-                              ),
-                          ],
+                        Text(
+                          "LKR ${ad['price']}",
+                          style: AppTypography.body.copyWith(
+                            color: AppColors.blue,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                        const SizedBox(height: 8),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 8, vertical: 4),
-                              decoration: BoxDecoration(
-                                color: _conditionColor(itemCondition),
-                                borderRadius: BorderRadius.circular(12),
+                        if (showFavoriteToggle)
+                          Obx(
+                            () => IconButton(
+                              icon: Icon(
+                                favoritesController.favorites.any((f) =>
+                                        f['ad_id'].toString() ==
+                                        ad['ad_id'].toString())
+                                    ? Icons.favorite
+                                    : Icons.favorite_border,
+                                color: Colors.red,
                               ),
-                              child: Text(
-                                itemCondition,
-                                style: AppTypography.caption.copyWith(
-                                  fontSize: 11,
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
+                              onPressed: () {
+                                final isFavorite = favoritesController.favorites
+                                    .any((f) =>
+                                        f['ad_id'].toString() ==
+                                        ad['ad_id'].toString());
+                                if (isFavorite) {
+                                  favoritesController
+                                      .removeFavorite(ad['ad_id'].toString());
+                                } else {
+                                  favoritesController
+                                      .addFavorite(ad['ad_id'].toString());
+                                }
+                              },
                             ),
-                            if (location != null)
-                              Flexible(
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    const Icon(Icons.location_on,
-                                        size: 14, color: Colors.grey),
-                                    const SizedBox(width: 4),
-                                    Expanded(
-                                      child: Text(
-                                        location!,
-                                        style: AppTypography.caption.copyWith(
-                                          fontSize: 12,
-                                          color: Colors.grey[700],
-                                        ),
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                          ],
-                        ),
+                          ),
                       ],
                     ),
-                  ),
-                ],
-              ),
-              // Favorite Button
-              if (onFavoriteToggle != null)
-                Positioned(
-                  top: 8,
-                  right: 8,
-                  child: GestureDetector(
-                    onTap: onFavoriteToggle,
-                    child: CircleAvatar(
-                      radius: 16,
-                      backgroundColor: Colors.white.withOpacity(0.9),
-                      child: Icon(
-                        isFavorite ? Icons.favorite : Icons.favorite_border,
-                        color: isFavorite ? Colors.red : Colors.grey[600],
-                        size: 20,
+                    if (onEdit != null || onDelete != null) ...[
+                      const Divider(),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          if (onEdit != null)
+                            IconButton(
+                              icon:
+                                  const Icon(Icons.edit, color: AppColors.blue),
+                              onPressed: onEdit,
+                            ),
+                          if (onDelete != null)
+                            IconButton(
+                              icon: const Icon(Icons.delete,
+                                  color: AppColors.error),
+                              onPressed: onDelete,
+                            ),
+                        ],
                       ),
-                    ),
-                  ),
+                    ],
+                  ],
                 ),
+              ),
             ],
           ),
         ),
       ),
-    );
-  }
-
-  Widget _imagePlaceholder() {
-    return Container(
-      width: double.infinity,
-      height: 130,
-      decoration: BoxDecoration(
-        color: Colors.grey[200],
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-      ),
-      child: const Icon(Icons.image, color: Colors.grey, size: 50),
-    );
-  }
-
-  Color _conditionColor(String condition) {
-    switch (condition.toLowerCase()) {
-      case 'new':
-        return Colors.green[700]!;
-      case 'used':
-        return Colors.orange[700]!;
-      case 'like new':
-        return Colors.teal[600]!;
-      default:
-        return Colors.grey[600]!;
-    }
+    )
+        .animate()
+        .fadeIn(
+          duration: 400.ms,
+          delay: (animationIndex * 100).ms,
+        )
+        .scale(
+          begin: const Offset(0.9, 0.9),
+          end: const Offset(1.0, 1.0),
+          duration: 400.ms,
+          delay: (animationIndex * 100).ms,
+          curve: Curves.easeOut,
+        );
   }
 }

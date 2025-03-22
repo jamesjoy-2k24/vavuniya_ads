@@ -23,14 +23,13 @@ class LoginScreen extends StatelessWidget {
     return Scaffold(
       body: Stack(
         children: [
-          AppBg(),
+          const AppBg(),
           SafeArea(
             child: Padding(
               padding: const EdgeInsets.all(16.0),
               child: SingleChildScrollView(
                 child: SizedBox(
-                  height: MediaQuery.of(context).size.height -
-                      32, // Adjust for SafeArea
+                  height: MediaQuery.of(context).size.height - 32,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -39,81 +38,58 @@ class LoginScreen extends StatelessWidget {
                         children: [
                           const Back(),
                           const SizedBox(height: 20),
-                          Text(
-                            "Welcome Back!",
-                            style: AppTypography.heading,
-                          ),
+                          Text("Welcome Back!", style: AppTypography.heading),
                           const SizedBox(height: 10),
                           Text(
-                            "Enter your credentials to seamlessly continue where you left off and unlock the full potential of your account.",
+                            "Enter your credentials to continue.",
                             style: AppTypography.caption,
                             textAlign: TextAlign.center,
                           ),
                           const SizedBox(height: 30),
 
                           // Mobile Number Field
-                          AppTextField(
-                            label: "Mobile",
-                            hintText: "Enter your mobile number",
-                            controller: controller.phoneController,
-                            keyboardType: TextInputType.number,
-                            icon: Icons.phone_android_outlined,
-                            onChanged: (value) {
-                              // Handle change
-                            },
-                            suffixIcon: IconButton(
-                              icon: Icon(Icons.check),
-                              onPressed: () {},
-                            ),
-                          ),
+                          Obx(() => AppTextField(
+                                label: "Mobile",
+                                hintText: "Enter your mobile number",
+                                controller: controller.phoneController,
+                                keyboardType: TextInputType.number,
+                                icon: Icons.phone_android_outlined,
+                                errorText:
+                                    controller.phoneError.value.isNotEmpty
+                                        ? controller.phoneError.value
+                                        : null,
+                                onChanged: (value) {},
+                                suffixIcon: IconButton(
+                                  icon: const Icon(Icons.clear),
+                                  onPressed: () {
+                                    controller.phoneController.clear();
+                                  },
+                                ),
+                              )),
+
+                          // Password Field
                           Obx(
-                            () => controller.errorMessage.isNotEmpty &&
-                                    controller.phoneController.text.isEmpty
-                                ? Padding(
-                                    padding:
-                                        const EdgeInsets.only(left: 16, top: 4),
-                                    child: Text(
-                                      controller.errorMessage.value,
-                                      style: const TextStyle(
-                                        color: Colors.red,
-                                        fontSize: 12,
-                                      ),
-                                    ),
-                                  )
-                                : const SizedBox.shrink(),
-                          ),
-                          AppTextField(
-                            label: "Password",
-                            hintText: "Enter your password",
-                            keyboardType: TextInputType.visiblePassword,
-                            controller: controller.passwordController,
-                            obscureText: true,
-                            validator: controller.validatePassword,
-                            icon: Icons.lock_outline,
-                            onChanged: (value) {
-                              // Handle change
-                            },
-                            suffixIcon: IconButton(
-                              icon: Icon(Icons.visibility_off),
-                              onPressed: () {
-                                // Handle visibility toggle
-                              },
+                            () => AppTextField(
+                              label: "Password",
+                              hintText: "Enter your password",
+                              controller: controller.passwordController,
+                              obscureText: true,
+                              icon: Icons.lock_outline,
+                              errorText:
+                                  controller.passwordError.value.isNotEmpty
+                                      ? controller.passwordError.value
+                                      : null,
+                              suffixIcon: IconButton(
+                                icon: const Icon(Icons.visibility_off),
+                                onPressed: () {
+                                  // Toggle visibility (requires additional state in controller)
+                                  // For now, placeholder
+                                  Get.snackbar("Info", "Visibility toggle TBD");
+                                },
+                              ),
+                              keyboardType: TextInputType.text,
+                              onChanged: (value) {},
                             ),
-                          ),
-                          Obx(
-                            () => controller.passwordError.isNotEmpty
-                                ? Padding(
-                                    padding:
-                                        const EdgeInsets.only(left: 16, top: 4),
-                                    child: Text(
-                                      controller.passwordError.value,
-                                      style: const TextStyle(
-                                        color: Colors.red,
-                                        fontSize: 12,
-                                      ),
-                                    ),
-                                  )
-                                : const SizedBox.shrink(),
                           ),
 
                           // Remember Me & Forgot Password
@@ -129,17 +105,15 @@ class LoginScreen extends StatelessWidget {
                                     },
                                     activeColor: AppColors.dark,
                                   ),
-                                  const Text(
-                                    "Remember Me",
-                                    style:
-                                        TextStyle(color: AppColors.textPrimary),
-                                  ),
+                                  const Text("Remember Me",
+                                      style: TextStyle(
+                                          color: AppColors.textPrimary)),
                                 ],
                               ),
                               TextButton(
                                 onPressed: () {
-                                  Get.snackbar("Info",
-                                      "Forgot Password feature coming soon!");
+                                  Get.snackbar(
+                                      "Info", "Forgot Password coming soon!");
                                 },
                                 child: Text(
                                   "Forgot Password?",
@@ -158,7 +132,7 @@ class LoginScreen extends StatelessWidget {
                             () => AppButton(
                               text: "Login",
                               onPressed: controller.isFormValid.value
-                                  ? () => controller.login()
+                                  ? controller.login
                                   : () {},
                               isLoading: controller.isLoading.value,
                               color: AppColors.dark,
@@ -171,33 +145,26 @@ class LoginScreen extends StatelessWidget {
                           AlreadyAccount(
                             message: "Don't have an account?",
                             actionText: "Register",
-                            onTap: () {
-                              Get.offNamed(AppRoutes.register);
-                            },
+                            onTap: () => Get.offNamed(AppRoutes.register),
                           ),
 
-                          // Social Login
-                          OrDivider(heading: "Or Login with"),
+                          // Social Login (placeholders)
+                          const OrDivider(heading: "Or Login with"),
                           SocialIcons(
                             assetPath: "assets/images/fb.png",
                             text: "Continue With Facebook",
-                            onPressed: () {
-                              Get.snackbar(
-                                  "Info", "Facebook login coming soon!");
-                            },
+                            onPressed: () => Get.snackbar(
+                                "Info", "Facebook login coming soon!"),
                           ),
                           SocialIcons(
                             assetPath: "assets/images/google.png",
                             text: "Continue With Google",
-                            onPressed: () {
-                              Get.snackbar("Info", "Google login coming soon!");
-                            },
+                            onPressed: () => Get.snackbar(
+                                "Info", "Google login coming soon!"),
                           ),
                         ],
                       ),
-
-                      // Privacy Policy at Bottom
-                      PrivacyPolicy(),
+                      const PrivacyPolicy(),
                     ],
                   ),
                 ),

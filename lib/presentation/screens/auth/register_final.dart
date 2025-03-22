@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:vavuniya_ads/core/controllers/auth/register_final_controller.dart';
 import 'package:vavuniya_ads/widgets/app/app_bg.dart';
 import 'package:vavuniya_ads/widgets/app/app_button.dart';
@@ -11,13 +12,12 @@ class RegisterFinal extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final RegisterFinalController controller =
-        Get.put(RegisterFinalController());
+    final controller = Get.put(RegisterFinalController());
 
     return Scaffold(
       body: Stack(
         children: [
-          AppBg(),
+          const AppBg(),
           SafeArea(
             child: Padding(
               padding: const EdgeInsets.all(20.0),
@@ -26,134 +26,150 @@ class RegisterFinal extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Text(
-                      "Enter Your Details",
+                      "Complete Your Profile",
                       style:
                           Theme.of(context).textTheme.headlineMedium?.copyWith(
                                 fontWeight: FontWeight.bold,
-                                fontSize: 24,
+                                fontSize: 28,
+                                color: AppColors.dark,
                               ),
                     ),
-                    const SizedBox(height: 10),
+                    const SizedBox(height: 16),
                     Text(
-                      "Enter your details to complete registration and \n continue with your account.",
+                      "Add your name and password to finish registration.",
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                             color: Colors.grey[700],
+                            fontSize: 16,
                           ),
                       textAlign: TextAlign.center,
                     ),
-                    const SizedBox(height: 30),
+                    const SizedBox(height: 40),
 
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        AppTextField(
-                          label: "Name",
-                          hintText: "Enter your name",
-                          controller: controller.nameController,
-                          keyboardType: TextInputType.numberWithOptions(),
-                          validator: controller.validateName,
-                          onChanged: (value) {
-                            // Handle change
-                          },
-                          suffixIcon: IconButton(
-                            icon: Icon(Icons.person_outline),
-                            onPressed: () {},
-                          ),
+                    // Name Field
+                    Obx(
+                      () => AppTextField(
+                        label: "Name",
+                        hintText: "e.g., John Doe",
+                        controller: controller.nameController,
+                        keyboardType: TextInputType.text,
+                        errorText: controller.nameError.value.isNotEmpty
+                            ? controller.nameError.value
+                            : null,
+                        icon: Icons.person_outline,
+                        suffixIcon: IconButton(
+                          icon: controller.nameError.value.isNotEmpty
+                              ? const Icon(Icons.error_outline,
+                                  color: Colors.red)
+                              : const Icon(Icons.check, color: Colors.green),
+                          onPressed: () {},
                         ),
-                        Obx(
-                          () => controller.nameError.isNotEmpty
-                              ? Padding(
-                                  padding:
-                                      const EdgeInsets.only(left: 16, top: 4),
-                                  child: Text(
-                                    controller.nameError.value,
-                                    style: const TextStyle(
-                                        color: Colors.red, fontSize: 12),
-                                  ),
-                                )
-                              : const SizedBox.shrink(),
-                        ),
-                      ],
-                    ),
-
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        AppTextField(
-                          label: "Password",
-                          hintText: "Enter your password",
-                          controller: controller.passwordController,
-                          keyboardType: TextInputType.visiblePassword,
-                          obscureText: true,
-                          validator: controller.validatePassword,
-                          onChanged: (value) {},
-                          suffixIcon: IconButton(
-                            icon: Icon(Icons.lock_outline),
-                            onPressed: () {},
-                          ),
-                        ),
-                        Obx(
-                          () => controller.passwordError.isNotEmpty
-                              ? Padding(
-                                  padding:
-                                      const EdgeInsets.only(left: 16, top: 4),
-                                  child: Text(
-                                    controller.passwordError.value,
-                                    style: const TextStyle(
-                                        color: Colors.red, fontSize: 12),
-                                  ),
-                                )
-                              : const SizedBox.shrink(),
-                        ),
-                      ],
-                    ),
-
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        AppTextField(
-                          label: "Confirm Password",
-                          hintText: "Confirm your password",
-                          controller: controller.confirmPasswordController,
-                          obscureText: true,
-                          validator: controller.validateConfirmPassword,
-                          onChanged: (value) {
-                            // Handle change
-                          },
-                          suffixIcon: IconButton(
-                            icon: Icon(Icons.lock_outline),
-                            onPressed: () {},
-                          ),
-                          keyboardType: TextInputType.visiblePassword,
-                        ),
-                        Obx(
-                          () => controller.confirmPasswordError.isNotEmpty
-                              ? Padding(
-                                  padding:
-                                      const EdgeInsets.only(left: 16, top: 4),
-                                  child: Text(
-                                    controller.confirmPasswordError.value,
-                                    style: const TextStyle(
-                                        color: Colors.red, fontSize: 12),
-                                  ),
-                                )
-                              : const SizedBox.shrink(),
-                        ),
-                      ],
+                        onChanged: (value) {},
+                      ).animate(
+                        effects: controller.showErrors.value &&
+                                controller.nameError.value.isNotEmpty
+                            ? [
+                                const ShakeEffect(
+                                    duration: Duration(milliseconds: 300))
+                              ]
+                            : [],
+                      ),
                     ),
                     const SizedBox(height: 20),
 
-                    // Button
+                    // Password Field
                     Obx(
-                      () => AppButton(
-                        text: "Done",
-                        onPressed: controller.isFormValid.value
-                            ? () => controller.submit()
-                            : () {},
-                        isLoading: controller.isLoading.value,
-                        color: AppColors.dark,
-                        textColor: Colors.white,
-                        fullWidth: true,
+                      () => AppTextField(
+                        label: "Password",
+                        hintText: "Min 6 characters",
+                        controller: controller.passwordController,
+                        keyboardType: TextInputType.text,
+                        onChanged: (value) {},
+                        obscureText: controller.obscurePassword.value,
+                        errorText: controller.passwordError.value.isNotEmpty
+                            ? controller.passwordError.value
+                            : null,
+                        icon: Icons.lock_outline,
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            controller.obscurePassword.value
+                                ? Icons.visibility_off
+                                : Icons.visibility,
+                            color: controller.passwordError.value.isNotEmpty
+                                ? Colors.red
+                                : Colors.grey,
+                          ),
+                          onPressed: controller.togglePasswordVisibility,
+                        ),
+                      ).animate(
+                        effects: controller.showErrors.value &&
+                                controller.passwordError.value.isNotEmpty
+                            ? [
+                                const ShakeEffect(
+                                    duration: Duration(milliseconds: 300))
+                              ]
+                            : [],
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+
+                    // Confirm Password Field
+                    Obx(
+                      () => AppTextField(
+                        label: "Confirm Password",
+                        hintText: "Repeat password",
+                        controller: controller.confirmPasswordController,
+                        obscureText: controller.obscureConfirmPassword.value,
+                        errorText:
+                            controller.confirmPasswordError.value.isNotEmpty
+                                ? controller.confirmPasswordError.value
+                                : null,
+                        icon: Icons.lock_outline,
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            controller.obscureConfirmPassword.value
+                                ? Icons.visibility_off
+                                : Icons.visibility,
+                            color:
+                                controller.confirmPasswordError.value.isNotEmpty
+                                    ? Colors.red
+                                    : Colors.grey,
+                          ),
+                          onPressed: controller.toggleConfirmPasswordVisibility,
+                        ),
+                        keyboardType: TextInputType.text,
+                        onChanged: (value) {},
+                      ).animate(
+                        effects: controller.showErrors.value &&
+                                controller.confirmPasswordError.value.isNotEmpty
+                            ? [
+                                const ShakeEffect(
+                                    duration: Duration(milliseconds: 300))
+                              ]
+                            : [],
+                      ),
+                    ),
+                    const SizedBox(height: 30),
+
+                    // Submit Button with Tooltip
+                    Obx(
+                      () => Tooltip(
+                        message: controller.isFormValid.value
+                            ? "Finish registration"
+                            : "Please fix the errors above",
+                        child: AppButton(
+                          text: controller.isLoading.value
+                              ? "Registering..."
+                              : "Finish",
+                          onPressed: controller.isLoading.value
+                              ? () {}
+                              : controller.submit,
+                          isLoading: controller.isLoading.value,
+                          color: controller.isFormValid.value
+                              ? AppColors.dark
+                              : Colors.grey,
+                          textColor: Colors.white,
+                          fullWidth: true,
+                        ),
                       ),
                     ),
                   ],

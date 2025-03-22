@@ -16,7 +16,7 @@ class MobileNumberField extends StatelessWidget {
     required this.label,
     required this.controller,
     required this.hintText,
-    required this.fillColor,
+    required this.fillColor, String? errorText,
   });
 
   @override

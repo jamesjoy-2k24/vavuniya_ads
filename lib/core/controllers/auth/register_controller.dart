@@ -6,8 +6,9 @@ import 'dart:convert';
 class RegisterController extends GetxController {
   final TextEditingController phoneController = TextEditingController();
   final RxBool isLoading = false.obs;
-  final RxString phoneNumber = "".obs;
-  final RxString errorMessage = "".obs;
+  final RxString phoneError = ''.obs;
+  final RxString errorMessage = ''.obs;
+  final RxBool isFormValid = false.obs;
 
   static const String baseUrl = 'http://localhost/vavuniya_ads';
 
@@ -15,29 +16,26 @@ class RegisterController extends GetxController {
   void onInit() {
     super.onInit();
     phoneController.addListener(_onPhoneChanged);
+    _updateFormValidity();
   }
 
   void _onPhoneChanged() {
     String text = phoneController.text.trim();
     if (text.isEmpty) {
-      errorMessage.value = "Please enter your mobile number";
-      phoneNumber.value = "";
-      return;
-    }
-    if (text.startsWith("0")) {
-      phoneController.text = text.substring(1);
-      phoneController.selection = TextSelection.fromPosition(
-        TextPosition(offset: phoneController.text.length),
-      );
-    }
-    if (text.length > 9) {
+      phoneError.value = "Please enter your mobile number";
+    } else if (text.length > 9) {
       phoneController.text = text.substring(0, 9);
       phoneController.selection = TextSelection.fromPosition(
         TextPosition(offset: phoneController.text.length),
       );
+    } else {
+      phoneError.value = validatePhoneNumber(text) ?? '';
     }
-    phoneNumber.value = phoneController.text;
-    errorMessage.value = validatePhoneNumber(phoneNumber.value) ?? "";
+    _updateFormValidity();
+  }
+
+  void _updateFormValidity() {
+    isFormValid.value = phoneError.isEmpty && phoneController.text.isNotEmpty;
   }
 
   String? validatePhoneNumber(String? value) {
@@ -51,16 +49,18 @@ class RegisterController extends GetxController {
   }
 
   Future<void> sendOtp() async {
-    String phoneNumberValue = "+94${phoneNumber.value.trim()}";
-    if (phoneNumberValue.length != 12) {
-      errorMessage.value = "Please enter a valid 9-digit phone number";
-      Get.snackbar("Error", "Invalid phone number",
-          snackPosition: SnackPosition.TOP,
-          backgroundColor: Colors.redAccent,
-          colorText: Colors.white);
+    if (!isFormValid.value) {
+      Get.snackbar(
+        "Error",
+        "Please enter a valid mobile number",
+        snackPosition: SnackPosition.TOP,
+        backgroundColor: Colors.redAccent,
+        colorText: Colors.white,
+      );
       return;
     }
 
+    String phoneNumberValue = "+94${phoneController.text.trim()}";
     isLoading.value = true;
     errorMessage.value = "";
 
@@ -95,23 +95,16 @@ class RegisterController extends GetxController {
       );
 
       final data = jsonDecode(response.body);
-      if (response.statusCode == 200 && data['otp'] != null) {
-        Get.snackbar(
-          "OTP",
-          "Your OTP is: ${data['otp']}",
-          snackPosition: SnackPosition.TOP,
-          backgroundColor: Colors.green,
-          colorText: Colors.white,
-        );
+      if (response.statusCode == 200) {
         Get.toNamed("/otp", arguments: {"phone": phoneNumberValue});
       } else {
         throw data['error'] ?? 'Unknown error';
       }
     } catch (e) {
-      errorMessage.value = "Failed to process OTP: $e";
+      errorMessage.value = e.toString().replaceFirst('Exception: ', '');
       Get.snackbar(
         "Error",
-        "Something went wrong: $e",
+        errorMessage.value,
         snackPosition: SnackPosition.TOP,
         backgroundColor: Colors.redAccent,
         colorText: Colors.white,

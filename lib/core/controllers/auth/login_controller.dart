@@ -5,15 +5,15 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vavuniya_ads/config/app_routes.dart';
 import 'package:vavuniya_ads/widgets/pop_up.dart';
+import 'package:jwt_decoder/jwt_decoder.dart';
 
 class LoginController extends GetxController {
   final TextEditingController phoneController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final RxBool isLoading = false.obs;
-  final RxString phoneNumber = "".obs;
-  final RxString errorMessage = ''.obs;
   final RxString phoneError = ''.obs;
   final RxString passwordError = ''.obs;
+  final RxString errorMessage = ''.obs;
   final RxBool isFormValid = false.obs;
 
   static const String baseUrl = 'http://localhost/vavuniya_ads';
@@ -23,60 +23,49 @@ class LoginController extends GetxController {
     super.onInit();
     phoneController.addListener(_onPhoneChanged);
     passwordController.addListener(_onPasswordChanged);
-    _updateFormValidity(); // Initial check
+    _updateFormValidity();
   }
 
   void _onPhoneChanged() {
     String text = phoneController.text.trim();
     if (text.isEmpty) {
       phoneError.value = "Please enter your mobile number";
-      phoneNumber.value = "";
-    } else if (text.startsWith("0")) {
-      phoneController.text = text.substring(1);
-      phoneController.selection = TextSelection.fromPosition(
-        TextPosition(offset: phoneController.text.length),
-      );
-    } else if (text.length > 9) {
-      phoneController.text = text.substring(0, 9);
+    } else if (text.length > 10) {
+      phoneController.text = text.substring(0, 10);
       phoneController.selection = TextSelection.fromPosition(
         TextPosition(offset: phoneController.text.length),
       );
     } else {
-      phoneNumber.value = phoneController.text;
-      phoneError.value = validatePhoneNumber(phoneNumber.value) ?? '';
+      phoneError.value = validatePhoneNumber(text) ?? '';
     }
     _updateFormValidity();
   }
 
   void _onPasswordChanged() {
-    validatePassword(passwordController.text);
+    passwordError.value = validatePassword(passwordController.text) ?? '';
     _updateFormValidity();
   }
 
   void _updateFormValidity() {
-    isFormValid.value = phoneError.isEmpty && passwordError.isEmpty;
+    isFormValid.value = phoneError.isEmpty &&
+        passwordError.isEmpty &&
+        phoneController.text.isNotEmpty &&
+        passwordController.text.isNotEmpty;
   }
 
   String? validatePhoneNumber(String? value) {
     if (value == null || value.isEmpty) {
       return "Please enter your mobile number";
     }
-    if (value.length != 9 || !RegExp(r'^\d{9}$').hasMatch(value)) {
-      return "Mobile number must be exactly 9 digits";
+    if (value.length != 10 || !RegExp(r'^\d{10}$').hasMatch(value)) {
+      return "Mobile number must be exactly 10 digits";
     }
     return null;
   }
 
   String? validatePassword(String? value) {
-    if (value == null || value.isEmpty) {
-      passwordError.value = "Password is required";
-      return passwordError.value;
-    }
-    if (value.length < 6) {
-      passwordError.value = "Password must be at least 6 characters";
-      return passwordError.value;
-    }
-    passwordError.value = '';
+    if (value == null || value.isEmpty) return "Password is required";
+    if (value.length < 6) return "Password must be at least 6 characters";
     return null;
   }
 
@@ -92,7 +81,7 @@ class LoginController extends GetxController {
       return;
     }
 
-    String phoneNumberValue = "+94${phoneController.text.trim()}";
+    String phoneNumberValue = "+94${phoneController.text.trim().substring(1)}";
     String password = passwordController.text;
     isLoading.value = true;
     errorMessage.value = "";
@@ -109,30 +98,31 @@ class LoginController extends GetxController {
 
       final data = jsonDecode(response.body);
       if (response.statusCode == 200) {
+        final token = data['token'];
+        final decodedToken = JwtDecoder.decode(token); // Decode JWT
         final prefs = await SharedPreferences.getInstance();
         await prefs.setBool('isLoggedIn', true);
-        await prefs.setInt('userId', data['user_id']);
-        await prefs.setString('token', data['token'] ?? '');
+        await prefs.setInt('userId', decodedToken['user_id']);
+        await prefs.setString('role', decodedToken['role'] ?? 'user');
+        await prefs.setString('token', token);
 
+        // Navigate based on role
+        final route = decodedToken['role'] == 'admin'
+            ? AppRoutes.adminDashboard
+            : AppRoutes.home;
         showCustomDialogPopup(
           title: "Login Successful",
           content: "You have successfully logged in.",
           buttonText: "OK",
           icon: Icons.check_circle_rounded,
           iconColor: Colors.green,
-          onPressed: () {
-            Get.back();
-            Get.offAllNamed(AppRoutes.home);
-          },
+          onPressed: () => Get.offAllNamed(route),
         );
-        await Future.delayed(const Duration(seconds: 2));
-        Get.back();
-        Get.offAllNamed(AppRoutes.home);
       } else {
         throw data['error'] ?? 'Unknown error';
       }
     } catch (e) {
-      errorMessage.value = "Login failed : $e";
+      errorMessage.value = e.toString().replaceFirst('Exception: ', '');
       Get.snackbar(
         "Error",
         errorMessage.value,

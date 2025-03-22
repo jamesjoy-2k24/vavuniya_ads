@@ -29,7 +29,7 @@ class OTPInputBoxes extends StatelessWidget {
                     currentText.substring(0, index) +
                         value +
                         currentText.substring(index + 1, 6);
-                controller.isButtonDisabled.value =
+                controller.isButtonEnabled.value =
                     controller.otpController.text.trim().length != 6;
 
                 // Move focus to next box
@@ -44,7 +44,7 @@ class OTPInputBoxes extends StatelessWidget {
                     controller.otpController.text.padRight(6, ' ');
                 controller.otpController.text =
                     '${currentText.substring(0, index)} ${currentText.substring(index + 1, 6)}';
-                controller.isButtonDisabled.value =
+                controller.isButtonEnabled.value =
                     controller.otpController.text.trim().length != 6;
 
                 if (index > 0) {

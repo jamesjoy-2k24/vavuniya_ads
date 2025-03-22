@@ -24,6 +24,11 @@ dependencies:
   http: ^1.1.0
   carousel_slider: ^5.0.0
   share_plus: ^7.0.0
+  image_picker: ^1.0.4
+  jwt_decoder: ^2.0.1
+  flutter_animate: ^4.5.2
+  flutter_debouncer: ^2.0.0
+  debounce_throttle: ^2.0.0
 
 dev_dependencies:
   flutter_test:

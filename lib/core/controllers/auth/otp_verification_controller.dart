@@ -1,35 +1,34 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-
-import 'package:vavuniya_ads/core/controllers/auth/register_controller.dart';
 import 'package:vavuniya_ads/widgets/pop_up.dart';
 
 class OTPVerificationController extends GetxController {
   final TextEditingController otpController = TextEditingController();
-  final RxBool isButtonDisabled = true.obs;
+  final RxBool isLoading = false.obs;
+  final RxBool isButtonEnabled = false.obs;
   final RxBool canResend = false.obs;
   final RxInt timerCount = 30.obs;
-  final RxBool isLoading = false.obs;
-  late String phoneNumber;
+  final RxString errorMessage = ''.obs;
+  final String phoneNumber;
 
   static const String baseUrl = 'http://localhost/vavuniya_ads';
+
+  OTPVerificationController({required this.phoneNumber});
 
   @override
   void onInit() {
     super.onInit();
-    final args = Get.arguments as Map<String, dynamic>?;
-    phoneNumber = args?['phone'] ?? '';
     startTimer();
     otpController.addListener(_onOtpChanged);
   }
 
   void _onOtpChanged() {
     final otp = otpController.text.trim();
-    isButtonDisabled.value = otp.length != 6;
+    isButtonEnabled.value = otp.length == 6;
+    if (otp.length == 6) errorMessage.value = '';
   }
 
   void startTimer() {
@@ -45,17 +44,15 @@ class OTPVerificationController extends GetxController {
     });
   }
 
-  Future<void> verifyOTP(String otp) async {
+  Future<void> verifyOTP() async {
+    final otp = otpController.text.trim();
     if (otp.length != 6) {
-      Get.snackbar("Error", "Please enter a 6-digit OTP",
-          snackPosition: SnackPosition.TOP,
-          backgroundColor: Colors.red,
-          colorText: Colors.white);
+      errorMessage.value = "Please enter a 6-digit OTP";
       return;
     }
 
-    isButtonDisabled.value = true;
     isLoading.value = true;
+    errorMessage.value = '';
 
     try {
       final response = await http.post(
@@ -68,34 +65,70 @@ class OTPVerificationController extends GetxController {
       if (response.statusCode == 200) {
         showCustomDialogPopup(
           title: "Success",
-          content: "OTP verification successful",
+          content: "Phone number verified successfully!",
           icon: Icons.check_circle,
+          iconColor: Colors.green,
           buttonText: "Continue",
-          onPressed: () => Get.back(),
+          onPressed: () {
+            Get.back(); // Close dialog
+            Get.offNamed("/register-final", arguments: {"phone": phoneNumber});
+          },
         );
-
-        await Future.delayed(const Duration(seconds: 2));
-        Get.back();
-        // Pass phoneNumber to RegisterFinal
-        Get.offNamed("/register-final", arguments: {"phone": phoneNumber});
       } else {
         throw data['error'] ?? 'Unknown error';
       }
     } catch (e) {
-      Get.snackbar("Error", "Verification failed: $e",
-          snackPosition: SnackPosition.TOP,
-          backgroundColor: Colors.red,
-          colorText: Colors.white);
+      errorMessage.value = e.toString() == 'Invalid or expired OTP'
+          ? "The OTP is invalid or has expired"
+          : "Verification failed. Please try again.";
+      Get.snackbar(
+        "Error",
+        errorMessage.value,
+        snackPosition: SnackPosition.TOP,
+        backgroundColor: Colors.redAccent,
+        colorText: Colors.white,
+      );
     } finally {
       isLoading.value = false;
-      isButtonDisabled.value = false;
     }
   }
 
   Future<void> resendOTP() async {
     if (!canResend.value) return;
-    await Get.find<RegisterController>().sendOtp();
-    startTimer();
+
+    isLoading.value = true;
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/api/auth/send_otp'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'phone': phoneNumber}),
+      );
+
+      final data = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        Get.snackbar(
+          "Success",
+          "OTP resent successfully",
+          snackPosition: SnackPosition.TOP,
+          backgroundColor: Colors.green,
+          colorText: Colors.white,
+        );
+        startTimer();
+      } else {
+        throw data['error'] ?? 'Failed to resend OTP';
+      }
+    } catch (e) {
+      errorMessage.value = "Failed to resend OTP. Please try again.";
+      Get.snackbar(
+        "Error",
+        errorMessage.value,
+        snackPosition: SnackPosition.TOP,
+        backgroundColor: Colors.redAccent,
+        colorText: Colors.white,
+      );
+    } finally {
+      isLoading.value = false;
+    }
   }
 
   @override
