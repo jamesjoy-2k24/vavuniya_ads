@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:flutter_animate/flutter_animate.dart';
+import 'package:vavuniya_ads/widgets/ad/ad_card.dart';
+import 'package:vavuniya_ads/core/controllers/home/favorites_controller.dart';
 import 'package:vavuniya_ads/widgets/app/app_color.dart';
 import 'package:vavuniya_ads/widgets/app/app_typography.dart';
-import 'package:vavuniya_ads/core/controllers/home/favorites_controller.dart';
-import 'package:vavuniya_ads/widgets/product/app_card.dart';
 
 class FavoritesScreen extends StatelessWidget {
   static const String route = "/favorites";
@@ -28,36 +27,26 @@ class FavoritesScreen extends StatelessWidget {
         backgroundColor: AppColors.secondary,
         elevation: 0,
       ),
-      body: // Ensure this matches your file
-          Obx(
+      body: Obx(
         () => controller.isLoading.value
-            ? const SizedBox(
-                height: 150,
-                child: Center(
-                    child: CircularProgressIndicator(color: AppColors.dark)),
-              )
+            ? const Center(
+                child: CircularProgressIndicator(color: AppColors.dark))
             : controller.favorites.isEmpty
-                ? const SizedBox(
-                    height: 150,
-                    child: Center(
-                        child: Text("No favorites yet",
-                            style: TextStyle(color: AppColors.grey))),
-                  )
-                : SizedBox(
-                    height: 150,
-                    child: ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: controller.favorites.length > 5
-                          ? 5
-                          : controller.favorites.length,
-                      itemBuilder: (context, index) {
-                        final favorite = controller.favorites[index];
-                        return AdCard(
-                          ad: favorite,
-                          animationIndex: index,
-                        );
-                      },
-                    ),
+                ? const Center(
+                    child: Text("No favorites yet",
+                        style: TextStyle(color: AppColors.grey)))
+                : ListView.builder(
+                    padding: const EdgeInsets.all(16),
+                    itemCount: controller.favorites.length,
+                    itemBuilder: (context, index) {
+                      final favorite = controller.favorites[index];
+                      return AdCard(
+                        ad: favorite,
+                        showFavoriteToggle: true,
+                        showDescription: true,
+                        animationIndex: index,
+                      );
+                    },
                   ),
       ),
     );

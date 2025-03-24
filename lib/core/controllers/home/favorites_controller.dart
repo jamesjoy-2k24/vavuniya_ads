@@ -15,6 +15,7 @@ class FavoritesController extends GetxController {
     fetchFavorites();
   }
 
+  /// Fetches the user's favorite ads
   Future<void> fetchFavorites() async {
     isLoading.value = true;
     try {
@@ -25,9 +26,6 @@ class FavoritesController extends GetxController {
           'Authorization': 'Bearer ${await _getToken()}',
         },
       );
-
-      // // Debug raw response
-      // print('Raw response: ${response.body}');
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
@@ -48,6 +46,7 @@ class FavoritesController extends GetxController {
     }
   }
 
+  /// Adds an ad to the user's favorites
   Future<void> addFavorite(String adId) async {
     try {
       final response = await http.post(
@@ -76,27 +75,54 @@ class FavoritesController extends GetxController {
 
   Future<void> removeFavorite(String adId) async {
     try {
-      final response = await http.post(
-        Uri.parse('$baseUrl/api/favorites/remove'),
+      final response = await http.delete(
+        Uri.parse('$baseUrl/api/favorites/remove?id=$adId'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer ${await _getToken()}',
         },
-        body: jsonEncode({'ad_id': int.parse(adId)}),
       );
 
       if (response.statusCode == 200) {
         fetchFavorites();
         Get.snackbar("Success", "Removed from favorites",
             snackPosition: SnackPosition.TOP);
+      } else if (response.statusCode == 404) {
+        Get.snackbar("Error", "Ad not found in favorites",
+            snackPosition: SnackPosition.TOP,
+            backgroundColor: Colors.redAccent,
+            colorText: Colors.white);
       } else {
-        throw 'Failed to remove favorite: ${response.statusCode}';
+        throw 'Failed to remove favorite: ${response.statusCode} - ${response.body}';
       }
     } catch (e) {
       Get.snackbar("Error", "Couldn’t remove favorite: $e",
           snackPosition: SnackPosition.TOP,
           backgroundColor: Colors.redAccent,
           colorText: Colors.white);
+    }
+  }
+
+  /// 🕒 Formats the "time ago" display for ads
+  String timeAgo(String createdAt) {
+    final createdDate = DateTime.tryParse(createdAt) ?? DateTime.now();
+    final now = DateTime.now();
+    final difference = now.difference(createdDate);
+
+    if (difference.inMinutes < 1) {
+      return "Just now";
+    } else if (difference.inHours < 1) {
+      return "${difference.inMinutes} min ago";
+    } else if (difference.inDays < 1) {
+      return "${difference.inHours} hrs ago";
+    } else if (difference.inDays == 1) {
+      return "Yesterday";
+    } else if (difference.inDays < 7) {
+      return "${difference.inDays} days ago";
+    } else if (difference.inDays < 30) {
+      return "${(difference.inDays / 7).floor()} weeks ago";
+    } else {
+      return "${(difference.inDays / 30).floor()} months ago";
     }
   }
 

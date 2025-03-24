@@ -29,6 +29,7 @@ dependencies:
   flutter_animate: ^4.5.2
   flutter_debouncer: ^2.0.0
   debounce_throttle: ^2.0.0
+  intl: ^0.17.0
 
 dev_dependencies:
   flutter_test:
