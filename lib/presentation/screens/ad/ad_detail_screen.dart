@@ -25,7 +25,7 @@
 //       body: Obx(
 //         () => controller.isLoading.value && ad.value.isEmpty
 //             ? const Center(
-//                 child: CircularProgressIndicator(color: AppColors.dark))
+//                 child: LoadingIndicator())
 //             : CustomScrollView(
 //                 slivers: [
 //                   _buildAppBar(context, ad),

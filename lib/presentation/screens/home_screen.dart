@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:vavuniya_ads/core/controllers/home/home_controller.dart';
 import 'package:vavuniya_ads/widgets/app/app_bg.dart';
-import 'package:vavuniya_ads/widgets/app/app_color.dart';
+import 'package:vavuniya_ads/widgets/app/loading_indicator.dart';
+import 'package:vavuniya_ads/widgets/home/bottom_bar.dart';
 import 'package:vavuniya_ads/widgets/home/categories.dart';
 import 'package:vavuniya_ads/widgets/home/favorites.dart';
 import 'package:vavuniya_ads/widgets/home/first_time_notice.dart';
@@ -19,10 +20,10 @@ class HomeScreen extends StatelessWidget {
     return Scaffold(
       body: Stack(
         children: [
-          const AppBg(), // Background
+          const AppBg(),
           Column(
             children: [
-              const HomeSearchBar(), // Search Bar
+              const HomeSearchBar(),
               Expanded(
                 child: SingleChildScrollView(
                   physics: const AlwaysScrollableScrollPhysics(),
@@ -37,6 +38,7 @@ class HomeScreen extends StatelessWidget {
                   ),
                 ),
               ),
+              const BottomBar(),
             ],
           ),
 
@@ -46,7 +48,7 @@ class HomeScreen extends StatelessWidget {
                 ? Container(
                     color: Colors.black.withOpacity(0.3),
                     child: const Center(
-                      child: CircularProgressIndicator(color: AppColors.dark),
+                      child: LoadingIndicator(),
                     ),
                   )
                 : const SizedBox.shrink();

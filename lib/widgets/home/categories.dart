@@ -4,6 +4,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:vavuniya_ads/core/controllers/home/categories_controller.dart';
 import 'package:vavuniya_ads/widgets/app/app_color.dart';
 import 'package:vavuniya_ads/widgets/app/app_typography.dart';
+import 'package:vavuniya_ads/widgets/app/loading_indicator.dart';
 
 class Categories extends StatelessWidget {
   const Categories({super.key});
@@ -31,8 +32,7 @@ class Categories extends StatelessWidget {
                 ? const SizedBox(
                     height: 120,
                     child: Center(
-                        child:
-                            CircularProgressIndicator(color: AppColors.dark)),
+                        child:LoadingIndicator()),
                   )
                 : controller.categories.isEmpty
                     ? const SizedBox(

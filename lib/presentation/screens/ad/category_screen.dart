@@ -4,6 +4,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:vavuniya_ads/widgets/app/app_color.dart';
 import 'package:vavuniya_ads/widgets/app/app_typography.dart';
 import 'package:vavuniya_ads/core/controllers/home/categories_controller.dart';
+import 'package:vavuniya_ads/widgets/app/loading_indicator.dart';
 
 class CategoriesScreen extends StatelessWidget {
   static const String route = "/categories";
@@ -30,7 +31,7 @@ class CategoriesScreen extends StatelessWidget {
       body: Obx(
         () => controller.isLoading.value
             ? const Center(
-                child: CircularProgressIndicator(color: AppColors.dark))
+                child: LoadingIndicator())
             : controller.categories.isEmpty
                 ? const Center(
                     child: Text("No categories available",

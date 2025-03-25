@@ -5,19 +5,21 @@ import 'package:vavuniya_ads/widgets/ad/ad_card.dart';
 import 'package:vavuniya_ads/widgets/app/app_color.dart';
 import 'package:vavuniya_ads/widgets/app/app_typography.dart';
 import 'package:vavuniya_ads/core/controllers/home/favorites_controller.dart';
+import 'package:vavuniya_ads/widgets/app/loading_indicator.dart';
 
 class Favorites extends StatelessWidget {
   const Favorites({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.put(FavoritesController());
+    final FavoritesController controller = Get.put(FavoritesController());
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Header Section
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -37,39 +39,52 @@ class Favorites extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 12),
+
+          // Favorites List
           Obx(
-            () => controller.isLoading.value
-                ? const SizedBox(
-                    height: 240, // Adjusted for dynamic height
-                    child: Center(
-                        child:
-                            CircularProgressIndicator(color: AppColors.dark)),
-                  )
-                : controller.favorites.isEmpty
-                    ? const SizedBox(
-                        height: 240,
-                        child: Center(
-                            child: Text("No favorites yet",
-                                style: TextStyle(color: AppColors.grey))),
-                      )
-                    : SizedBox(
-                        height: 240,
-                        child: ListView.builder(
-                          scrollDirection: Axis.horizontal,
-                          itemCount: controller.favorites.length > 7
-                              ? 7
-                              : controller.favorites.length,
-                          itemBuilder: (context, index) {
-                            final favorite = controller.favorites[index];
-                            return AdCard(
-                              ad: favorite,
-                              showFavoriteToggle: false,
-                              showDescription: false,
-                              animationIndex: index,
-                            );
-                          },
-                        ),
-                      ),
+            () {
+              if (controller.isLoading.value) {
+                return const SizedBox(
+                  height: 240,
+                  child: Center(
+                    child: LoadingIndicator(  ),
+                  ),
+                );
+              }
+
+              if (controller.favorites.isEmpty) {
+                return const SizedBox(
+                  height: 240,
+                  child: Center(
+                    child: Text(
+                      "No favorites yet",
+                      style: TextStyle(color: AppColors.grey),
+                    ),
+                  ),
+                );
+              }
+
+              return SizedBox(
+                height: 220,
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: controller.favorites.length.clamp(0, 7),
+                  itemBuilder: (context, index) {
+                    final favorite = controller.favorites[index];
+
+                    return AdCard(
+                      ad: favorite,
+                      width: 250,
+                      showFavoriteToggle: false,
+                      showDescription: false,
+                      animationIndex: index,
+                      isFavorite: true,
+                      onFavoriteToggle: () => (),
+                    );
+                  },
+                ),
+              );
+            },
           ),
         ],
       ),

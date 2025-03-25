@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:vavuniya_ads/config/app_routes.dart';
 import 'package:vavuniya_ads/core/controllers/auth/register_controller.dart';
 import 'package:vavuniya_ads/widgets/app/app_color.dart';
+import 'package:vavuniya_ads/widgets/app/loading_indicator.dart';
 import 'package:vavuniya_ads/widgets/auth/back.dart';
 import 'package:vavuniya_ads/widgets/app/app_bg.dart';
 import 'package:vavuniya_ads/widgets/app/app_button.dart';
@@ -80,13 +81,9 @@ class RegisterScreen extends StatelessWidget {
                           ? const Padding(
                               padding: EdgeInsets.only(left: 10),
                               child: SizedBox(
-                                width: 20,
-                                height: 20,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  color: Colors.white,
-                                ),
-                              ),
+                                  width: 20,
+                                  height: 20,
+                                  child: LoadingIndicator()),
                             )
                           : null,
                     ),
