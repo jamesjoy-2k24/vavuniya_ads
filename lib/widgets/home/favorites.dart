@@ -53,7 +53,7 @@ class Favorites extends StatelessWidget {
                                 style: TextStyle(color: AppColors.grey))),
                       )
                     : SizedBox(
-                        height: 200,
+                        height: 240,
                         child: ListView.builder(
                           scrollDirection: Axis.horizontal,
                           itemCount: controller.favorites.length > 7

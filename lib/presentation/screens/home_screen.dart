@@ -6,7 +6,7 @@ import 'package:vavuniya_ads/widgets/app/app_color.dart';
 import 'package:vavuniya_ads/widgets/home/categories.dart';
 import 'package:vavuniya_ads/widgets/home/favorites.dart';
 import 'package:vavuniya_ads/widgets/home/first_time_notice.dart';
-// import 'package:vavuniya_ads/widgets/home/recent_ads.dart';
+import 'package:vavuniya_ads/widgets/home/recent_ads.dart';
 import 'package:vavuniya_ads/widgets/home/search_bar.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -15,43 +15,42 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final HomeController controller = Get.put(HomeController());
+
     return Scaffold(
       body: Stack(
         children: [
-          const AppBg(),
+          const AppBg(), // Background
           Column(
             children: [
-              HomeSearchBar(),
+              const HomeSearchBar(), // Search Bar
               Expanded(
                 child: SingleChildScrollView(
                   physics: const AlwaysScrollableScrollPhysics(),
-                  child: Container(
-                    color: Colors.transparent,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const FirstTimeNotice(),
-                        const Categories(),
-                        const Favorites(),
-                        // const RecentAds(),
-                        const SizedBox(height: 32),
-                      ],
-                    ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: const [
+                      FirstTimeNotice(),
+                      Categories(),
+                      Favorites(),
+                      RecentAds(),
+                    ],
                   ),
                 ),
               ),
             ],
           ),
-          Obx(
-            () => controller.isLoading.value && controller.ads.isEmpty
+
+          // Loading Overlay
+          Obx(() {
+            return controller.isLoading.value && controller.ads.isEmpty
                 ? Container(
                     color: Colors.black.withOpacity(0.3),
                     child: const Center(
-                        child:
-                            CircularProgressIndicator(color: AppColors.dark)),
+                      child: CircularProgressIndicator(color: AppColors.dark),
+                    ),
                   )
-                : const SizedBox.shrink(),
-          ),
+                : const SizedBox.shrink();
+          }),
         ],
       ),
     );

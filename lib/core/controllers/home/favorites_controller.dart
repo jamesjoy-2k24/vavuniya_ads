@@ -50,12 +50,11 @@ class FavoritesController extends GetxController {
   Future<void> addFavorite(String adId) async {
     try {
       final response = await http.post(
-        Uri.parse('$baseUrl/api/favorites/add'),
+        Uri.parse('$baseUrl/api/favorites/add?id=$adId'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer ${await _getToken()}',
         },
-        body: jsonEncode({'ad_id': int.parse(adId)}),
       );
 
       if (response.statusCode == 200) {

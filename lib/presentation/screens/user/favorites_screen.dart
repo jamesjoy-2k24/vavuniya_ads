@@ -43,7 +43,6 @@ class FavoritesScreen extends StatelessWidget {
                       return AdCard(
                         ad: favorite,
                         showFavoriteToggle: true,
-                        showDescription: true,
                         animationIndex: index,
                       );
                     },
