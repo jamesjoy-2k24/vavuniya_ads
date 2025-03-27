@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vavuniya_ads/config/app_routes.dart';
 import 'package:vavuniya_ads/widgets/app/app_bg.dart';
+import 'package:vavuniya_ads/widgets/app/app_typography.dart';
 import 'package:vavuniya_ads/widgets/welcome_screen/skip.dart';
 import 'package:vavuniya_ads/widgets/welcome_screen/get_start.dart';
 import 'package:vavuniya_ads/widgets/welcome_screen/feature_list.dart';
@@ -34,14 +35,7 @@ class WelcomeScreen extends StatelessWidget {
                 // Heading
                 Text(
                   "Welcome to Vavuniya Ads",
-                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                            fontSize: 24,
-                            fontWeight: FontWeight.w900,
-                          ) ??
-                      TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.w900,
-                      ),
+                  style: AppTypography.heading,
                 ),
 
                 // Body

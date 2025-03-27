@@ -6,7 +6,7 @@ class AppTheme {
   static ThemeData lightTheme = ThemeData(
     primaryColor: AppColors.primary,
     scaffoldBackgroundColor: AppColors.background,
-    textTheme: const TextTheme(
+    textTheme:  TextTheme(
       displayLarge: AppTypography.heading,
       titleMedium: AppTypography.subheading,
       bodyLarge: AppTypography.body,
@@ -20,7 +20,7 @@ class AppTheme {
         borderRadius: BorderRadius.circular(12),
         borderSide: BorderSide.none,
       ),
-      hintStyle: AppTypography.body.copyWith(color: AppColors.grey),
+      hintStyle: AppTypography.body.copyWith(color: AppColors.textSecondary),
     ),
   );
 }

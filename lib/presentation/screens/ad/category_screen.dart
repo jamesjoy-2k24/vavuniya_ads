@@ -30,12 +30,11 @@ class CategoriesScreen extends StatelessWidget {
       ),
       body: Obx(
         () => controller.isLoading.value
-            ? const Center(
-                child: LoadingIndicator())
+            ? const Center(child: LoadingIndicator())
             : controller.categories.isEmpty
-                ? const Center(
+                ? Center(
                     child: Text("No categories available",
-                        style: TextStyle(color: AppColors.grey)),
+                        style: TextStyle(color: AppColors.textSecondary)),
                   )
                 : _buildFullCategories(controller),
       ),

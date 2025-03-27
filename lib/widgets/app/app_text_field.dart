@@ -25,7 +25,11 @@ class AppTextField extends StatefulWidget {
     this.fillColor,
     this.borderColor,
     this.borderRadius = 12.0,
-    this.icon, required TextInputType keyboardType, required void Function(dynamic value) onChanged, required IconButton suffixIcon, String? errorText,
+    this.icon,
+    required TextInputType keyboardType,
+    required void Function(dynamic value) onChanged,
+    required IconButton suffixIcon,
+    String? errorText,
   });
 
   @override
@@ -62,7 +66,7 @@ class _AppTextFieldState extends State<AppTextField> {
               ),
               hintText: widget.hintText,
               hintStyle: AppTypography.body.copyWith(
-                color: AppColors.grey.withOpacity(0.7),
+                color: AppColors.textSecondary,
               ),
               prefixIcon: widget.prefixIcon != null
                   ? Icon(

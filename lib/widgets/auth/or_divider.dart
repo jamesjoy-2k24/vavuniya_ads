@@ -15,7 +15,7 @@ class OrDivider extends StatelessWidget {
           Expanded(
             child: Container(
               height: 1,
-              color: AppColors.grey,
+              color: AppColors.textSecondary,
             ),
           ),
           Padding(
@@ -28,7 +28,7 @@ class OrDivider extends StatelessWidget {
           Expanded(
             child: Container(
               height: 1,
-              color: AppColors.grey,
+              color: AppColors.textSecondary,
             ),
           ),
         ],

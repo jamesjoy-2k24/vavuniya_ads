@@ -17,7 +17,7 @@ class AddPostScreen extends StatelessWidget {
             children: [
               AppBar(
                 title: const Text("Post an Ad"),
-                backgroundColor: AppColors.blue,
+                backgroundColor: AppColors.secondary,
                 elevation: 0,
               ),
               Expanded(
@@ -73,7 +73,7 @@ class AddPostScreen extends StatelessWidget {
                           );
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.blue,
+                          backgroundColor: AppColors.secondary,
                           padding: const EdgeInsets.symmetric(
                               vertical: 14, horizontal: 24),
                           shape: RoundedRectangleBorder(

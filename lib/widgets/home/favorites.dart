@@ -47,18 +47,18 @@ class Favorites extends StatelessWidget {
                 return const SizedBox(
                   height: 240,
                   child: Center(
-                    child: LoadingIndicator(  ),
+                    child: LoadingIndicator(),
                   ),
                 );
               }
 
               if (controller.favorites.isEmpty) {
-                return const SizedBox(
+                return  SizedBox(
                   height: 240,
                   child: Center(
                     child: Text(
                       "No favorites yet",
-                      style: TextStyle(color: AppColors.grey),
+                      style: TextStyle(color: AppColors.textSecondary),
                     ),
                   ),
                 );

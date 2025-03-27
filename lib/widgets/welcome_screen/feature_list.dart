@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:vavuniya_ads/widgets/app/app_typography.dart';
 
 class WelcomeScreenFeature extends StatelessWidget {
   const WelcomeScreenFeature({super.key});
@@ -36,11 +37,10 @@ class WelcomeScreenFeature extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                  style: AppTypography.title,
                 ),
-                SizedBox(height: 5),
-                Text(description,
-                    style: TextStyle(fontSize: 14, color: Colors.grey[700])),
+                SizedBox(height: 5), 
+                Text(description, style: AppTypography.description),
               ],
             ),
           ),

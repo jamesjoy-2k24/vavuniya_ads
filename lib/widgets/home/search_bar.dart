@@ -32,8 +32,8 @@ class HomeSearchBar extends StatelessWidget {
                   controller: controller.searchController,
                   decoration: InputDecoration(
                     hintText: 'Search in Vavuniya Ads...',
-                    hintStyle:
-                        AppTypography.caption.copyWith(color: AppColors.grey),
+                    hintStyle: AppTypography.caption
+                        .copyWith(color: AppColors.textSecondary),
                     prefixIcon: const Icon(Icons.search, color: AppColors.dark),
                     suffixIcon: Obx(
                       () => controller.isTyping.value

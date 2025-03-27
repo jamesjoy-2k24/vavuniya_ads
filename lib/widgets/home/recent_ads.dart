@@ -39,9 +39,9 @@ class RecentAds extends StatelessWidget {
                     child: LoadingIndicator(),
                   );
                 } else if (controller.recentAds.isEmpty) {
-                  return const Center(
+                  return  Center(
                     child: Text("No recent ads",
-                        style: TextStyle(color: AppColors.grey)),
+                        style: TextStyle(color: AppColors.textSecondary)),
                   );
                 } else {
                   return Padding(

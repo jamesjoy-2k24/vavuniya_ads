@@ -16,7 +16,8 @@ class MobileNumberField extends StatelessWidget {
     required this.label,
     required this.controller,
     required this.hintText,
-    required this.fillColor, String? errorText,
+    required this.fillColor,
+    String? errorText,
   });
 
   @override
@@ -46,7 +47,8 @@ class MobileNumberField extends StatelessWidget {
             decoration: InputDecoration(
               contentPadding: const EdgeInsets.symmetric(horizontal: 20),
               hintText: hintText,
-              hintStyle: AppTypography.body.copyWith(color: AppColors.grey),
+              hintStyle:
+                  AppTypography.body.copyWith(color: AppColors.textSecondary),
               fillColor: fillColor,
               filled: true,
               border: OutlineInputBorder(

@@ -32,9 +32,10 @@ class FavoritesScreen extends StatelessWidget {
                   () => controller.isLoading.value
                       ? const Center(child: LoadingIndicator())
                       : controller.favorites.isEmpty
-                          ? const Center(
+                          ?  Center(
                               child: Text("No favorites yet",
-                                  style: TextStyle(color: AppColors.grey)))
+                                  style: TextStyle(
+                                      color: AppColors.textSecondary)))
                           : Padding(
                               padding: const EdgeInsets.all(16),
                               child: GridView.builder(

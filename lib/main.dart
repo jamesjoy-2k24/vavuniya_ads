@@ -16,6 +16,7 @@ class MyApp extends StatelessWidget {
     return GetMaterialApp(
       title: 'Vavuniya Ads',
       theme: AppTheme.lightTheme,
+      // darkTheme: ThemeData.dark(),
       initialRoute: AppRoutes.splash,
       getPages: AppRouter.routes,
       debugShowCheckedModeBanner: false,

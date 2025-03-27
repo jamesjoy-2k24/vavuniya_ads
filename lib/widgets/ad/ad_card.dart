@@ -93,9 +93,9 @@ class AdCard extends StatelessWidget {
                             : null,
                       ),
                       child: ad['images'] == null || ad['images'].isEmpty
-                          ? const Center(
+                          ?  Center(
                               child: Icon(Icons.image,
-                                  size: 50, color: AppColors.grey))
+                                  size: 50, color: AppColors.textSecondary))
                           : null,
                     ),
                   ),
@@ -162,7 +162,7 @@ class AdCard extends StatelessWidget {
                         description,
                         style: AppTypography.caption.copyWith(
                           fontSize: 12,
-                          color: AppColors.grey,
+                          color: AppColors.textSecondary,
                           height: 1.2,
                         ),
                         maxLines: 2,
@@ -172,14 +172,15 @@ class AdCard extends StatelessWidget {
                     const SizedBox(height: 6),
                     Row(
                       children: [
-                        Icon(Icons.category, size: 14, color: AppColors.grey),
+                        Icon(Icons.category,
+                            size: 14, color: AppColors.textSecondary),
                         const SizedBox(width: 4),
                         Expanded(
                           child: Text(
                             category,
                             style: AppTypography.caption.copyWith(
                               fontSize: 12,
-                              color: AppColors.grey,
+                              color: AppColors.textSecondary,
                             ),
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -206,13 +207,13 @@ class AdCard extends StatelessWidget {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Icon(Icons.location_on,
-                                size: 14, color: AppColors.grey),
+                                size: 14, color: AppColors.textSecondary),
                             const SizedBox(width: 4),
                             Text(
                               location,
                               style: AppTypography.caption.copyWith(
                                 fontSize: 12,
-                                color: AppColors.grey,
+                                color: AppColors.textSecondary,
                               ),
                             ),
                           ],

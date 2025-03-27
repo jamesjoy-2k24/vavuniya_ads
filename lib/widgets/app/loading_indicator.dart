@@ -11,4 +11,4 @@ class LoadingIndicator extends StatelessWidget {
       color: AppColors.dark,
     );
   }
-}
+} 

@@ -58,7 +58,7 @@
 //               ? () => controller.toggleFavorite(ad.value['id'].toString())
 //               : null,
 //           backgroundColor:
-//               ad.value['id'] != null ? AppColors.primary : AppColors.grey,
+//               ad.value['id'] != null ? AppColors.primary : AppColors.textSecondary,
 //           child: Icon(
 //             ad.value['is_favorite'] == true
 //                 ? Icons.favorite
@@ -99,7 +99,7 @@
 //         ),
 //         background: (ad.value['images'] as List?)?.isNotEmpty == true
 //             ? Image.network(ad.value['images'][0], fit: BoxFit.cover)
-//             : Container(color: AppColors.grey),
+//             : Container(color: AppColors.textSecondary),
 //       ),
 //       actions: [
 //         IconButton(
@@ -141,7 +141,7 @@
 //     return images.isEmpty
 //         ? Container(
 //             height: 200,
-//             color: AppColors.grey,
+//             color: AppColors.textSecondary,
 //             child: const Center(
 //                 child:
 //                     Text("No Images", style: TextStyle(color: Colors.white))),
@@ -189,7 +189,7 @@
 //                         shape: BoxShape.circle,
 //                         color: index == (ad.value['currentImageIndex'] ?? 0)
 //                             ? AppColors.primary
-//                             : AppColors.grey,
+//                             : AppColors.textSecondary,
 //                       ),
 //                     );
 //                   }).toList(),

@@ -31,15 +31,14 @@ class Categories extends StatelessWidget {
             () => controller.isLoading.value
                 ? const SizedBox(
                     height: 120,
-                    child: Center(
-                        child:LoadingIndicator()),
+                    child: Center(child: LoadingIndicator()),
                   )
                 : controller.categories.isEmpty
-                    ? const SizedBox(
+                    ?  SizedBox(
                         height: 120,
                         child: Center(
                           child: Text("No categories available",
-                              style: TextStyle(color: AppColors.grey)),
+                              style: TextStyle(color: AppColors.textSecondary)),
                         ),
                       )
                     : _buildCategories(controller),
