@@ -27,7 +27,7 @@ class UserController extends GetxController {
       }
 
       final response = await http.get(
-        Uri.parse('$baseUrl/api/users/me'),
+        Uri.parse('$baseUrl/api/user/me'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
