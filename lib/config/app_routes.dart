@@ -13,5 +13,4 @@ class AppRoutes {
   static const String favorites = "/favorites";
   static const String categories = "/categories";
   static const String registerFinal = '/register-final';
-  static const String adminDashboard = '/admin-dashboard';
 }

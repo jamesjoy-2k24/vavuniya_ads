@@ -2,7 +2,6 @@ import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:vavuniya_ads/config/app_routes.dart';
 // import 'package:vavuniya_ads/presentation/screens/ad/ad_detail_screen.dart';
-import 'package:vavuniya_ads/presentation/screens/admin/admin_dashboard.dart';
 import 'package:vavuniya_ads/presentation/screens/ad/category_screen.dart';
 import 'package:vavuniya_ads/presentation/screens/home_screen.dart';
 import 'package:vavuniya_ads/presentation/screens/user/profile_screen.dart';
@@ -62,9 +61,6 @@ class AppRouter {
         page: () => const PlaceholderScreen(title: 'Admin Settings')),
 
     // GetPage(name: AppRoutes.adDetail, page: () => const AdDetailScreen()),
-    GetPage(
-        name: AppRoutes.adminDashboard,
-        page: () => const AdminDashboardScreen()),
   ];
 
   static GetPage unknownRoute = GetPage(

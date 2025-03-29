@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:vavuniya_ads/core/controllers/user/my_ads_controller.dart';
+import 'package:vavuniya_ads/widgets/profile/add_ad_sheet.dart';
 import 'package:vavuniya_ads/widgets/profile/my_ads/ad_card.dart';
 import 'package:vavuniya_ads/widgets/app/app_color.dart';
 import 'package:vavuniya_ads/widgets/app/app_typography.dart';
@@ -88,22 +89,27 @@ class MyAdsContent extends StatelessWidget {
   }
 
   Widget _buildEmptyState() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(Icons.list_alt, size: 48, color: AppColors.grey),
-          const SizedBox(height: 12),
-          Text("No ads posted yet",
-              style: AppTypography.body.copyWith(color: AppColors.grey)),
-          const SizedBox(height: 12),
-          ElevatedButton(
-            onPressed: () => Get.toNamed('/add-ad'),
-            style: ElevatedButton.styleFrom(backgroundColor: AppColors.blue),
-            child: const Text("Post an Ad"),
-          ),
-        ],
-      ),
-    );
-  }
+  return Center(
+    child: Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        const Icon(Icons.list_alt, size: 48, color: AppColors.grey),
+        const SizedBox(height: 12),
+        Text("No ads posted yet", style: AppTypography.body.copyWith(color: AppColors.grey)),
+        const SizedBox(height: 12),
+        ElevatedButton(
+          onPressed: () {
+            Get.bottomSheet(
+              const AddAdSheet(),
+              isScrollControlled: true,
+              backgroundColor: Colors.transparent,
+            );
+          },
+          style: ElevatedButton.styleFrom(backgroundColor: AppColors.blue),
+          child: const Text("Post an Ad"),
+        ),
+      ],
+    ),
+  );
+}
 }

@@ -59,6 +59,75 @@ class UserController extends GetxController {
     }
   }
 
+  Future<void> changePassword(
+      String currentPassword, String newPassword) async {
+    try {
+      final token = await _getToken();
+      final response = await http.put(
+        Uri.parse('$baseUrl/api/user/password'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode({
+          'currentPassword': currentPassword,
+          'newPassword': newPassword,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        Get.snackbar('Success', 'Password changed successfully');
+      } else {
+        final data = jsonDecode(response.body);
+        error.value = data['error'] ?? 'Failed to change password';
+        Get.snackbar('Error', error.value);
+      }
+    } catch (e) {
+      error.value = 'Error changing password: $e';
+      Get.snackbar('Error', error.value);
+    }
+  }
+
+  Future<void> updateUserDetails(String name, String phone) async {
+    try {
+      if (name.isEmpty || phone.isEmpty) {
+        Get.snackbar('Error', 'Name and phone cannot be empty');
+        return;
+      }
+
+      final token = await _getToken();
+      if (token.isEmpty) {
+        Get.snackbar('Error', 'No authentication token found');
+        return;
+      }
+
+      final response = await http.put(
+        Uri.parse('$baseUrl/api/user/update_user'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode({
+          'name': name,
+          'phone2': phone,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        await fetchUserData();
+        Get.snackbar('Success', 'Profile updated successfully');
+      } else {
+        final data = jsonDecode(response.body);
+        error.value =
+            data['error'] ?? 'Failed to update profile: ${response.statusCode}';
+        Get.snackbar('Error', error.value);
+      }
+    } catch (e) {
+      error.value = 'Error updating profile: $e';
+      Get.snackbar('Error', error.value);
+    }
+  }
+
   Future<void> refreshUserData() async {
     await fetchUserData();
   }

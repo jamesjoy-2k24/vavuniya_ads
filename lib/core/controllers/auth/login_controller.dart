@@ -108,7 +108,7 @@ class LoginController extends GetxController {
 
         // Navigate based on role
         final route = decodedToken['role'] == 'admin'
-            ? AppRoutes.adminDashboard
+            ? AppRoutes.profile
             : AppRoutes.home;
         showCustomDialogPopup(
           title: "Login Successful",
