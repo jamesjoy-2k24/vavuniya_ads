@@ -8,7 +8,7 @@ import 'package:vavuniya_ads/widgets/profile/drawer.dart';
 import 'package:vavuniya_ads/widgets/profile/profile_content.dart';
 import 'package:vavuniya_ads/widgets/profile/my_ads_content.dart';
 import 'package:vavuniya_ads/widgets/profile/settings_content.dart';
-import 'package:vavuniya_ads/widgets/profile/manage_ads_content.dart';
+import 'package:vavuniya_ads/widgets/admin/manage_ads_content.dart';
 import 'package:vavuniya_ads/widgets/profile/manage_users_content.dart';
 import 'package:vavuniya_ads/widgets/profile/categories_content.dart';
 import 'package:vavuniya_ads/widgets/profile/reports_content.dart';
